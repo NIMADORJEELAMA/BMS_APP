@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   FlatList,
   Dimensions,
+  StatusBar,
 } from 'react-native';
 import {Text, Div} from '../../components/common/UI';
 import MainLayout from '../../screens/MainLayout';
@@ -12,58 +13,81 @@ import {orderService} from '../../services/orderService';
 import {useDispatch, useSelector} from 'react-redux';
 import {updateCartQuantity} from '../../redux/slices/cartSlice';
 import {RootState} from '../../redux/store';
-
-import {useNavigation} from '@react-navigation/native'; // Ensure this is imported
+import {useNavigation} from '@react-navigation/native';
 import ViewOrderModal from './ViewOrderModal';
+
 const screenWidth = Dimensions.get('window').width;
-const itemWidth = (screenWidth - 48) / 3; // Precise spacing for 3 columns
+const itemWidth = (screenWidth - 48) / 3; // Precise spacing for 3-column grid
 
 const OrderPage = ({route}: any) => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const {table} = route.params;
-  console.log('table111', table);
+
+  // State
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [isVegOnly, setIsVegOnly] = useState(false);
   const [selectedType, setSelectedType] = useState<'FOOD' | 'ALCOHOL'>('FOOD');
   const [modalVisible, setModalVisible] = useState(false);
-  const dispatch = useDispatch();
 
+  // Redux
+  const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
-  const itemCount = Object.values(cartItems).reduce(
-    (sum, item) => sum + item.quantity,
-    0,
-  );
+
   const totalCartCount = Object.values(cartItems).reduce(
     (sum, item) => sum + item.quantity,
     0,
   );
 
+  // Fetch Menu on Mount
   useEffect(() => {
     const fetchMenu = async () => {
       try {
         const data = await orderService.getMenu();
+        // Automatically hide inactive items
         setMenuItems(data.filter((item: any) => item.isActive));
       } catch (err) {
-        console.error(err);
+        console.error('Failed to fetch menu:', err);
       }
     };
     fetchMenu();
   }, []);
 
+  // Filter Logic
   const filteredItems = useMemo(() => {
     return menuItems.filter(item => {
       const matchesSearch = item.name
         .toLowerCase()
         .includes(search.toLowerCase());
       const matchesVeg = isVegOnly ? item.isVeg === true : true;
-      return matchesSearch && matchesVeg && item.type === selectedType;
+      const matchesType = item.type === selectedType;
+      return matchesSearch && matchesVeg && matchesType;
     });
   }, [search, isVegOnly, selectedType, menuItems]);
 
   const handleQtyChange = (item: any, delta: number) => {
     dispatch(updateCartQuantity({item, delta}));
   };
+
+  // Header Cart Icon Component
+  const CartIcon = () => (
+    <TouchableOpacity
+      onPress={() =>
+        navigation.navigate('CartScreen', {
+          tableId: table.id,
+          tableName: table.name,
+          table: table,
+        })
+      }
+      style={styles.cartContainer}>
+      <Text style={{fontSize: 22}}>🛒</Text>
+      {totalCartCount > 0 && (
+        <Div style={styles.badge}>
+          <Text style={styles.badgeText}>{totalCartCount}</Text>
+        </Div>
+      )}
+    </TouchableOpacity>
+  );
 
   const renderGridItem = ({item}: any) => {
     const quantity = cartItems[item.id]?.quantity || 0;
@@ -117,32 +141,15 @@ const OrderPage = ({route}: any) => {
       </Div>
     );
   };
-  const CartIcon = () => (
-    <TouchableOpacity
-      onPress={() =>
-        navigation.navigate('CartScreen', {
-          tableId: table.id,
-          tableName: table.name,
-          table: table, // Passing the full object just in case
-        })
-      }
-      style={styles.cartContainer}>
-      <Text style={{fontSize: 24}}>🛒</Text>
-      {itemCount > 0 && (
-        <Div style={styles.badge}>
-          <Text style={styles.badgeText}>{itemCount}</Text>
-        </Div>
-      )}
-    </TouchableOpacity>
-  );
+
   return (
     <MainLayout
-      title={`Table ${table.name}`}
+      title={`Table ${table.name || table.number}`}
       showBack
-      rightComponent={<CartIcon />} // Pass it here
-    >
+      rightComponent={<CartIcon />}>
+      <StatusBar barStyle="dark-content" />
       <Div p={12} flex={1} bg="#F8F9FA">
-        {/* Header Search & Toggle */}
+        {/* Search & Veg Toggle */}
         <Div style={styles.searchRow}>
           <TextInput
             style={styles.searchBar}
@@ -172,12 +179,12 @@ const OrderPage = ({route}: any) => {
           </TouchableOpacity>
         </Div>
 
-        {/* Floating Cart Button Info */}
+        {/* Action Buttons */}
         <Div style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.currentOrderBtn}
             onPress={() => setModalVisible(true)}>
-            <Text style={styles.btnText}>Current Order</Text>
+            <Text style={styles.btnText}>View Active Order</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.dropBtn}>
             <Text style={styles.btnText}>▼</Text>
@@ -209,12 +216,22 @@ const OrderPage = ({route}: any) => {
           numColumns={3}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{paddingBottom: 40}}
+          ListEmptyComponent={
+            <Div center mt={50}>
+              <Text style={{color: '#999'}}>
+                No items found matching your search.
+              </Text>
+            </Div>
+          }
         />
       </Div>
+
+      {/* Existing Orders Live State Modal */}
       <ViewOrderModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         table={table}
+        onRefresh={() => {}} // Hook this to fetchActiveOrders if needed
       />
     </MainLayout>
   );
@@ -244,7 +261,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
   },
-  // Search & Filters
   searchRow: {flexDirection: 'row', marginBottom: 12},
   searchBar: {
     flex: 0.75,
@@ -267,8 +283,6 @@ const styles = StyleSheet.create({
   },
   vegBtnActive: {borderColor: '#27ae60', backgroundColor: '#E8F5E9'},
   vegBtnLabel: {fontSize: 10, fontWeight: '800'},
-
-  // Action Buttons
   buttonRow: {flexDirection: 'row', marginBottom: 12},
   currentOrderBtn: {
     flex: 1,
@@ -288,8 +302,6 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   btnText: {color: '#FFF', fontWeight: 'bold', fontSize: 13},
-
-  // Slider
   slider: {
     flexDirection: 'row',
     backgroundColor: '#E9ECEF',
@@ -311,8 +323,6 @@ const styles = StyleSheet.create({
   },
   tabText: {fontWeight: 'bold', color: '#6C757D', fontSize: 12},
   activeTabText: {color: '#fa2c37'},
-
-  // Grid Card
   card: {
     width: itemWidth,
     margin: 4,
@@ -326,7 +336,7 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
     alignItems: 'center',
     justifyContent: 'space-between',
-    minHeight: 150,
+    minHeight: 155,
   },
   vegMarker: {
     borderWidth: 1,
@@ -337,62 +347,57 @@ const styles = StyleSheet.create({
   },
   vegDot: {width: 6, height: 6, borderRadius: 3},
   itemName: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
     color: '#212529',
     textAlign: 'center',
     marginTop: 4,
-    height: 38,
+    height: 36,
   },
   itemCategory: {
-    fontSize: 9,
+    fontSize: 8,
     color: '#ADB5BD',
     fontWeight: '600',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
-
-  cardFooter: {width: '100%', alignItems: 'center', marginTop: 10},
+  cardFooter: {width: '100%', alignItems: 'center', marginTop: 8},
   itemPrice: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800',
     color: '#495057',
-    marginBottom: 6,
+    marginBottom: 4,
   },
-
-  // Buttons & Qty
   addBtn: {
     backgroundColor: '#FFF',
     borderWidth: 1,
     borderColor: '#fa2c37',
     width: '100%',
-    paddingVertical: 6,
-    borderRadius: 8,
+    paddingVertical: 5,
+    borderRadius: 6,
     alignItems: 'center',
   },
-  addBtnText: {color: '#fa2c37', fontSize: 11, fontWeight: 'bold'},
-
+  addBtnText: {color: '#fa2c37', fontSize: 10, fontWeight: 'bold'},
   qtyControls: {
     flexDirection: 'row',
     backgroundColor: '#fa2c37',
     width: '100%',
-    borderRadius: 8,
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'space-between',
     overflow: 'hidden',
   },
   qtyTouch: {
-    paddingVertical: 6,
+    paddingVertical: 5,
     paddingHorizontal: 8,
     flex: 1,
     alignItems: 'center',
   },
-  qtyActionText: {color: '#FFF', fontSize: 16, fontWeight: 'bold'},
+  qtyActionText: {color: '#FFF', fontSize: 14, fontWeight: 'bold'},
   qtyValueText: {
     color: '#FFF',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 'bold',
-    minWidth: 20,
+    minWidth: 18,
     textAlign: 'center',
   },
 });

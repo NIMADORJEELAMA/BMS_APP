@@ -8,7 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import {Text} from './../components/common/UI';
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 interface MainLayoutProps {
@@ -17,7 +17,9 @@ interface MainLayoutProps {
   subtitle?: string;
   showBack?: boolean;
   leftComponent?: React.ReactNode; // For Drawer or custom back
-  rightComponent?: React.ReactNode; // For Cart, Profile, etc.
+  rightComponent?: React.ReactNode; // For Cart, Profile, <etc styleName={}></etc>
+  statusBarColor?: string;
+  barStyle?: 'dark-content' | 'light-content';
 }
 
 const MainLayout = ({
@@ -27,13 +29,22 @@ const MainLayout = ({
   showBack,
   leftComponent,
   rightComponent,
+  statusBarColor = '#fff', // Default color
+  barStyle = 'dark-content',
 }: MainLayoutProps) => {
+  const isFocused = useIsFocused();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+      {isFocused && (
+        <StatusBar
+          barStyle={barStyle}
+          backgroundColor={statusBarColor}
+          animated={true}
+        />
+      )}
 
       <View style={[styles.header, {paddingTop: insets.top + 4}]}>
         <View style={styles.headerTopRow}>
@@ -52,9 +63,7 @@ const MainLayout = ({
 
           {/* CENTER SECTION */}
           <View style={styles.centerSection}>
-            <Text style={styles.headerTitle} numberOfLines={1}>
-              {title}
-            </Text>
+            <Text style={styles.headerTitle}>{title}</Text>
             {subtitle && <Text style={styles.headerSubtitle}>{subtitle}</Text>}
           </View>
 
@@ -73,7 +82,7 @@ const MainLayout = ({
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: '#F4F7F8'},
   header: {
-    backgroundColor: '#FFF',
+    backgroundColor: '#fff',
     paddingHorizontal: 15,
     paddingBottom: 12,
     ...Platform.select({

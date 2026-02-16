@@ -20,7 +20,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import color from '../../assets/Color/color';
 import LocationIcon from '../../assets/Icons/location-point-svgrepo-com.svg';
 import ProfileGrid from './ProfileGrid';
-import {DatingScreen} from '../../screens/homeScreen/DatingScreen';
+import {DatingScreen} from '../../screens/TableSelectionScreen/DatingScreen';
 import IconButton from '../Dating/IconButton';
 
 const {width, height} = Dimensions.get('window');

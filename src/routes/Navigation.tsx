@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import {Div, Flex, Text} from '../components/common/UI';
 import Svg, {Circle, Path} from 'react-native-svg';
-import HomeScreen from '../screens/homeScreen';
+import HomeScreen from '../screens/TableSelectionScreen';
 import LoginScreen from '../screens/LoginScreen';
 import IntroScreen from '../screens/IntroScreen';
 import DateBirth from '../screens/DateBirth';
