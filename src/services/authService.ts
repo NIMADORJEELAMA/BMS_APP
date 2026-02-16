@@ -6,10 +6,4 @@ export const authService = {
     console.log('response', response);
     return response.data;
   },
-
-  // Future endpoints will look like this:
-  getTables: async () => {
-    const response = await axiosInstance.get('/tables');
-    return response.data;
-  },
 };

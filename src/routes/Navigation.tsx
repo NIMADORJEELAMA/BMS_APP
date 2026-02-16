@@ -38,6 +38,9 @@ import {useDispatch, useSelector} from 'react-redux';
 import {getToken} from '../utils/storage';
 import {setToken} from '../redux/slices/authSlice';
 import LoginScreenBms from '../screens/LoginScreenBms';
+import OrderPage from '../screens/OrderPage';
+import CartScreen from '../screens/CartScreen';
+import RoomSelectionScreen from '../screens/RoomSelectionScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -51,11 +54,14 @@ export type RootStackParamList = {
   DateBirth: undefined;
   HeightPicker: undefined;
   AuthScreen: undefined;
+  OrderPage: undefined;
+  CartScreen: undefined;
   GenderSelect: undefined;
   Name: undefined;
   Relation: undefined;
   AddPhotoList: undefined;
   Settings: undefined;
+
   Preferences: undefined;
   PhoneNumber: undefined;
   Email: undefined;
@@ -70,7 +76,9 @@ export type BottomTabParamList = {
   Notifications: undefined;
 
   Message: undefined;
+  RoomSelection: undefined;
 
+  SettingScreen: undefined;
   Profile: undefined;
 };
 export type TabBarButtonList = {
@@ -132,14 +140,14 @@ const TabNavigator: React.FC = () => (
     />
 
     <Tab.Screen
-      name="Notifications"
-      component={Notification}
+      name="RoomSelection"
+      component={RoomSelectionScreen}
       options={{
         headerShown: false,
         tabBarButton: (props: any) => (
           <AnimatedTabButton
             {...props}
-            label="Notifications"
+            label="RoomSelection"
             icon={
               <Svg width="20" height="22" viewBox="0 0 18 22" fill="none">
                 <Path
@@ -189,14 +197,14 @@ const TabNavigator: React.FC = () => (
       }}
     />
     <Tab.Screen
-      name="Profile"
-      component={ProfileScreen}
+      name="SettingScreen"
+      component={Settings}
       options={{
         headerShown: false,
         tabBarButton: (props: any) => (
           <AnimatedTabButton
             {...props}
-            label="Profile"
+            label="Settings"
             icon={
               <Svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                 <Path
@@ -255,6 +263,8 @@ const Navigation = () => {
       {/* <Stack.Screen name="Main" component={TabNavigator} /> */}
 
       <Stack.Screen name="AuthScreen" component={AuthScreen} />
+      <Stack.Screen name="OrderPage" component={OrderPage} />
+      <Stack.Screen name="CartScreen" component={CartScreen} />
 
       {/* <Stack.Screen name="Login" component={LoginScreen} /> */}
       <Stack.Screen name="Name" component={Name} />
@@ -267,7 +277,7 @@ const Navigation = () => {
       <Stack.Screen name="HeightPicker" component={HeightPicker} />
       <Stack.Screen name="AddPhotoList" component={AddPhoto} />
 
-      <Stack.Screen name="Settings" component={Settings} />
+      {/* <Stack.Screen name="Settings" component={Settings} /> */}
       <Stack.Screen name="Preferences" component={Preferences} />
       <Stack.Screen name="PhoneNumber" component={PhoneNumber} />
       <Stack.Screen name="Email" component={Email} />

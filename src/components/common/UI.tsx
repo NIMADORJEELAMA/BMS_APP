@@ -132,64 +132,130 @@ export const Button: React.FC<DivProps> = props => {
   );
 };
 export const Div: React.FC<DivProps> = props => {
-  return (
-    <View
-      style={[
-        {position: 'relative'},
-        props.bg !== undefined ? {backgroundColor: props.bg} : null,
-        props.bw !== undefined ? {borderWidth: props.bw} : null,
-        props.bc !== undefined ? {borderColor: props.bc} : null,
-        props.br !== undefined ? {borderRadius: props.br} : null,
-        props.alc !== undefined ? {alignItems: 'center'} : null,
-        props.center !== undefined ? {justifyContent: 'center'} : null,
-        props.flex !== undefined ? {flex: props.flex} : null,
+  const {
+    children,
+    bg,
+    bw,
+    bc,
+    br,
+    alc,
+    center,
+    flex,
+    ml,
+    mr,
+    mb,
+    mt,
+    p,
+    pl,
+    pr,
+    pb,
+    pt,
+    l,
+    r,
+    b,
+    t,
+    o,
+    width,
+    height,
+    maxHeight,
+    minHeight,
+    minWidth,
+    maxWidth,
+    style,
+  } = props;
 
-        props.ml !== undefined ? ({marginLeft: props.ml} as ViewStyle) : null,
-        props.mr !== undefined ? ({marginRight: props.mr} as ViewStyle) : null,
-        props.mb !== undefined ? ({marginBottom: props.mb} as ViewStyle) : null,
-        props.mt !== undefined ? ({marginTop: props.mt} as ViewStyle) : null,
+  const customStyle = {
+    position: 'relative' as const,
+    ...(bg !== undefined && {backgroundColor: bg}),
+    ...(bw !== undefined && {borderWidth: bw}),
+    ...(bc !== undefined && {borderColor: bc}),
+    ...(br !== undefined && {borderRadius: br}),
+    ...(alc !== undefined && {alignItems: 'center' as const}),
+    ...(center !== undefined && {justifyContent: 'center' as const}),
+    ...(flex !== undefined && {flex}),
+    ...(ml !== undefined && {marginLeft: ml}),
+    ...(mr !== undefined && {marginRight: mr}),
+    ...(mb !== undefined && {marginBottom: mb}),
+    ...(mt !== undefined && {marginTop: mt}),
+    ...(p !== undefined && {padding: p}),
+    ...(pl !== undefined && {paddingLeft: pl}),
+    ...(pr !== undefined && {paddingRight: pr}),
+    ...(pb !== undefined && {paddingBottom: pb}),
+    ...(pt !== undefined && {paddingTop: pt}),
+    ...(l !== undefined && {left: l}),
+    ...(r !== undefined && {right: r}),
+    ...(b !== undefined && {bottom: b}),
+    ...(t !== undefined && {top: t}),
+    ...(o !== undefined && {borderRadius: o}),
+    ...(width !== undefined && {width}),
+    ...(height !== undefined && {height}),
+    ...(maxHeight !== undefined && {maxHeight}),
+    ...(minHeight !== undefined && {minHeight}),
+    ...(minWidth !== undefined && {minWidth}),
+    ...(maxWidth !== undefined && {maxWidth}),
+  };
 
-        props.p !== undefined ? {padding: props.p} : null,
-        props.pl !== undefined ? {paddingLeft: props.pl} : null,
-        props.pr !== undefined ? {paddingRight: props.pr} : null,
-        props.pb !== undefined ? {paddingBottom: props.pb} : null,
-        props.pt !== undefined ? {paddingTop: props.pt} : null,
-
-        props.l !== undefined ? {left: props.l} : null,
-        props.r !== undefined ? {right: props.r} : null,
-        props.b !== undefined ? {bottom: props.b} : null,
-        props.t !== undefined ? {top: props.t} : null,
-        props.o !== undefined ? {borderRadius: props.o} : null,
-
-        props.width !== undefined ? ({width: props.width} as ViewStyle) : null,
-        ,
-        props.height !== undefined
-          ? ({height: props.height} as ViewStyle)
-          : null,
-
-        ,
-        props.maxHeight !== undefined
-          ? ({maxHeight: props.maxHeight} as ViewStyle)
-          : null,
-        ,
-        props.minHeight !== undefined
-          ? ({minHeight: props.minHeight} as ViewStyle)
-          : null,
-
-        ,
-        props.minWidth !== undefined
-          ? ({minWidth: props.minWidth} as ViewStyle)
-          : null,
-        props.maxWidth !== undefined
-          ? ({maxWidth: props.maxWidth} as ViewStyle)
-          : null,
-
-        props.style,
-      ]}>
-      {props.children}
-    </View>
-  );
+  return <View style={[customStyle as any, style]}>{children}</View>;
 };
+// export const Div: React.FC<DivProps> = props => {
+//   return (
+//     <View
+//       style={[
+//         {position: 'relative'},
+//         props.bg !== undefined ? {backgroundColor: props.bg} : null,
+//         props.bw !== undefined ? {borderWidth: props.bw} : null,
+//         props.bc !== undefined ? {borderColor: props.bc} : null,
+//         props.br !== undefined ? {borderRadius: props.br} : null,
+//         props.alc !== undefined ? {alignItems: 'center'} : null,
+//         props.center !== undefined ? {justifyContent: 'center'} : null,
+//         props.flex !== undefined ? {flex: props.flex} : null,
+
+//         props.ml !== undefined ? ({marginLeft: props.ml} as ViewStyle) : null,
+//         props.mr !== undefined ? ({marginRight: props.mr} as ViewStyle) : null,
+//         props.mb !== undefined ? ({marginBottom: props.mb} as ViewStyle) : null,
+//         props.mt !== undefined ? ({marginTop: props.mt} as ViewStyle) : null,
+
+//         props.p !== undefined ? {padding: props.p} : null,
+//         props.pl !== undefined ? {paddingLeft: props.pl} : null,
+//         props.pr !== undefined ? {paddingRight: props.pr} : null,
+//         props.pb !== undefined ? {paddingBottom: props.pb} : null,
+//         props.pt !== undefined ? {paddingTop: props.pt} : null,
+
+//         props.l !== undefined ? {left: props.l} : null,
+//         props.r !== undefined ? {right: props.r} : null,
+//         props.b !== undefined ? {bottom: props.b} : null,
+//         props.t !== undefined ? {top: props.t} : null,
+//         props.o !== undefined ? {borderRadius: props.o} : null,
+
+//         props.width !== undefined ? ({width: props.width} as ViewStyle) : null,
+//         ,
+//         props.height !== undefined
+//           ? ({height: props.height} as ViewStyle)
+//           : null,
+
+//         ,
+//         props.maxHeight !== undefined
+//           ? ({maxHeight: props.maxHeight} as ViewStyle)
+//           : null,
+//         ,
+//         props.minHeight !== undefined
+//           ? ({minHeight: props.minHeight} as ViewStyle)
+//           : null,
+
+//         ,
+//         props.minWidth !== undefined
+//           ? ({minWidth: props.minWidth} as ViewStyle)
+//           : null,
+//         props.maxWidth !== undefined
+//           ? ({maxWidth: props.maxWidth} as ViewStyle)
+//           : null,
+
+//         props.style,
+//       ]}>
+//       {props.children}
+//     </View>
+//   );
+// };
 interface TouchProps extends DivProps {
   onPress?: () => void;
   e?: number;

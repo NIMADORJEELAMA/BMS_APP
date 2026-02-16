@@ -36,10 +36,11 @@ import SmallButtonArrow from '../../components/SmallButtonArrow/index.tsx';
 import CustomButton from '../../components/CustomButton/index.tsx';
 import GlassButton from '../../components/GlassButton/GlassButton.tsx';
 import {policies} from '../../json/policies.tsx';
+import useLogout from '../../hooks/useLogout.tsx';
 const Settings = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
+  const handleLogout = useLogout();
   const [visible, setVisible] = useState(false);
   const [selectedPolicy, setSelectedPolicy] = useState<
     (typeof policies)[0] | null
@@ -292,7 +293,8 @@ const Settings = () => {
             <View style={{marginTop: 40, marginBottom: 50}}>
               <GlassButton
                 text="Log Out"
-                onPress={() => navigation.navigate('Intro')}
+                // onPress={() => navigation.navigate('Intro')}
+                onPress={handleLogout}
                 glassColor="dark"
               />
             </View>

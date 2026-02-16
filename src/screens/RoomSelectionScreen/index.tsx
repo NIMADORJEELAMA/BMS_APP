@@ -17,7 +17,7 @@ import {tableService} from '../../services/tableService';
 const {width} = Dimensions.get('window');
 const ITEM_WIDTH = (width - 40) / 2; // Adjusted for grid spacing
 
-const TableSelectionScreen = ({navigation}: any) => {
+const RoomSelectionScreen = ({navigation}: any) => {
   const [tables, setTables] = useState<any[]>([]);
   const [filteredTables, setFilteredTables] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +27,7 @@ const TableSelectionScreen = ({navigation}: any) => {
     try {
       const data = await tableService.getTables();
       // Logic: Only show tables where roomId is null
-      const floorTables = data.filter((t: any) => t.room === null);
+      const floorTables = data.filter((t: any) => t.room !== null);
       setTables(floorTables);
       setFilteredTables(floorTables);
     } catch (error) {
@@ -167,4 +167,4 @@ const styles = StyleSheet.create({
   itemText: {fontSize: 12, color: '#666', fontWeight: '600'},
 });
 
-export default TableSelectionScreen;
+export default RoomSelectionScreen;
