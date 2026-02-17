@@ -7,7 +7,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import SearchIcon from '../assets/Icons/search.svg'; // Adjust path
-import ClearIcon from '../assets/Icons/close.svg'; // Adjust path
+import ClearIcon from '../assets/Icons/closeIcon.svg'; // Adjust path
 
 interface SearchBarProps {
   value: string;
@@ -46,7 +46,7 @@ const SearchBar = ({
           activeOpacity={0.7}
           onPress={() => onChangeText('')}
           style={styles.clearButton}>
-          <ClearIcon width={22} height={22} fill="#94A3B8" />
+          <ClearIcon width={20} height={20} fill="#94A3B8" />
         </TouchableOpacity>
       )}
     </View>

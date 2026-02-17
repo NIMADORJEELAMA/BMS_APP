@@ -6,6 +6,7 @@ const color = {
   lightGrey: '#DDDDDD',
   Egrey: '#EEEEEE',
   purple: '#c2bff6',
+  dark: '#1E293B',
 };
 
 export default color;
