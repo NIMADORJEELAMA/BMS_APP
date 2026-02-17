@@ -31,7 +31,7 @@ const RoomSelectionScreen = ({navigation}: any) => {
       setTables(floorTables);
       setFilteredTables(floorTables);
     } catch (error) {
-      Alert.alert('Error', 'Failed to fetch table layout');
+      // Alert.alert('Error', 'Failed to fetch table layout');
     } finally {
       setLoading(false);
       setRefreshing(false);

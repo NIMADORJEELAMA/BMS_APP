@@ -64,12 +64,12 @@ const CustomDropdown = ({
         style={[styles.trigger, isOpen && styles.triggerActive]}
         onPress={toggleDropdown}>
         <Text
-          style={[styles.triggerText, !selectedOption && {color: '#94a3b8'}]}>
+          style={[styles.triggerText, !selectedOption && {color: '#64748B'}]}>
           {selectedOption ? selectedOption.label : placeholder}
         </Text>
         <Animated.Text
           style={[styles.arrow, {transform: [{rotate: rotation}]}]}>
-          <ArrowDownIcon width={12} height={12} fill="#94A3B8" />
+          <ArrowDownIcon width={12} height={12} fill="#64748B" />
         </Animated.Text>
       </TouchableOpacity>
 
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 4,
     fontWeight: '800',
-    color: '#94a3b8',
+    color: '#64748B',
 
     textTransform: 'uppercase',
     letterSpacing: 0.8,
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: 12,
-    color: '#475569',
+    color: '#64748B',
     fontWeight: '600',
     paddingVertical: 3,
   },

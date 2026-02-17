@@ -41,6 +41,7 @@ import LoginScreenBms from '../screens/LoginScreenBms';
 import OrderPage from '../screens/OrderPage';
 import CartScreen from '../screens/CartScreen';
 import RoomSelectionScreen from '../screens/RoomSelectionScreen';
+import SplashScreen from '../screens/SplashScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -235,66 +236,64 @@ const TabNavigator: React.FC = () => (
 );
 
 const Navigation = () => {
-  const [appLoading, setAppLoading] = useState(true);
-  const userToken = useSelector((state: any) => state.auth.token);
-  console.log('Current Token in Redux:', userToken);
-
   const dispatch = useDispatch();
-  console.log('Current Token in Redux:', userToken);
 
+  // 1. Pull everything from Redux Auth Slice
+  const {isAuthenticated, isLoading} = useSelector((state: any) => state.auth);
+
+  // 2. Only ONE useEffect to initialize the app
   useEffect(() => {
     const initAuth = async () => {
-      const storedToken = await getToken();
-      if (storedToken) {
+      try {
+        const storedToken = await getToken();
+        // This triggers setToken which sets isLoading to false in your slice
         dispatch(setToken(storedToken));
+      } catch (e) {
+        console.error('Failed to load token', e);
+        dispatch(setToken(null));
       }
-      setAppLoading(false);
     };
     initAuth();
-  }, []);
-  if (appLoading) return <ActivityIndicator />;
+  }, [dispatch]);
+
+  // 3. Show Splash while checking AsyncStorage
+  if (isLoading) {
+    return <SplashScreen />;
+  }
+
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
-      {userToken ? (
-        <Stack.Screen name="Main" component={TabNavigator} />
+      {isAuthenticated ? (
+        // APP STACK (Authenticated users)
+        <Stack.Group>
+          <Stack.Screen name="Main" component={TabNavigator} />
+          <Stack.Screen name="OrderPage" component={OrderPage} />
+          <Stack.Screen name="CartScreen" component={CartScreen} />
+          {/* Settings and other inner screens should be here */}
+          <Stack.Screen name="Preferences" component={Preferences} />
+          <Stack.Screen name="PhoneNumber" component={PhoneNumber} />
+          <Stack.Screen name="Email" component={Email} />
+          <Stack.Screen name="Location" component={Location} />
+          <Stack.Screen name="HelpCenter" component={HelpCenter} />
+          <Stack.Screen
+            name="NotificationSettings"
+            component={NotificationSettings}
+          />
+        </Stack.Group>
       ) : (
-        <Stack.Screen name="Login" component={LoginScreenBms} />
+        // AUTH STACK (Unauthenticated users)
+        <Stack.Group>
+          <Stack.Screen name="Login" component={LoginScreenBms} />
+          <Stack.Screen name="Intro" component={IntroScreen} />
+          <Stack.Screen name="AuthScreen" component={AuthScreen} />
+          <Stack.Screen name="Name" component={Name} />
+          <Stack.Screen name="DateBirth" component={DateBirth} />
+          <Stack.Screen name="GenderSelect" component={GenderSelection} />
+          <Stack.Screen name="HeightPicker" component={HeightPicker} />
+          <Stack.Screen name="Relation" component={RelationStatus} />
+          <Stack.Screen name="AddPhotoList" component={AddPhoto} />
+        </Stack.Group>
       )}
-      {/* <Stack.Screen name="Main" component={TabNavigator} /> */}
-
-      <Stack.Screen name="AuthScreen" component={AuthScreen} />
-      <Stack.Screen name="OrderPage" component={OrderPage} />
-      <Stack.Screen name="CartScreen" component={CartScreen} />
-
-      {/* <Stack.Screen name="Login" component={LoginScreen} /> */}
-      <Stack.Screen name="Name" component={Name} />
-
-      <Stack.Screen name="GenderSelect" component={GenderSelection} />
-      <Stack.Screen name="Relation" component={RelationStatus} />
-
-      <Stack.Screen name="Intro" component={IntroScreen} />
-      <Stack.Screen name="DateBirth" component={DateBirth} />
-      <Stack.Screen name="HeightPicker" component={HeightPicker} />
-      <Stack.Screen name="AddPhotoList" component={AddPhoto} />
-
-      {/* <Stack.Screen name="Settings" component={Settings} /> */}
-      <Stack.Screen name="Preferences" component={Preferences} />
-      <Stack.Screen name="PhoneNumber" component={PhoneNumber} />
-      <Stack.Screen name="Email" component={Email} />
-      <Stack.Screen name="Location" component={Location} />
-
-      <Stack.Screen name="HelpCenter" component={HelpCenter} />
-      <Stack.Screen
-        name="NotificationSettings"
-        component={NotificationSettings}
-      />
-
-      {/* <Stack.Screen name="Main" component={TabNavigator} /> */}
-      {/* <Stack.Screen name="otpVerification" component={OtpVerification} /> */}
-      {/* <Stack.Screen name="UserDetails" component={UserDetails} />
-   
-    <Stack.Screen name="ViewDetails" component={ViewDetails} />
-    <Stack.Screen name="BookingDetails" component={BookingDetails} />   */}
     </Stack.Navigator>
   );
 };

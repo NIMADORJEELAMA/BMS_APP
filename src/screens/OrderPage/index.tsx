@@ -315,6 +315,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F1F5F9',
     zIndex: 5000,
     position: 'relative',
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
     // elevation: 1,
   },
   searchRowContainer: {
@@ -352,7 +354,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
   },
   tabText: {fontSize: 11, fontWeight: '700', color: '#94A3B8'},
-  activeTabText: {color: '#FC8019'}, // Swiggy Orange
+  activeTabText: {color: '#1E293B'}, // Swiggy Orange
 
   dropdownWrapper: {
     minWidth: 130,

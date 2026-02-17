@@ -81,7 +81,7 @@ const MainLayout = ({
 };
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: '#F4F7F8'},
+  container: {flex: 1, backgroundColor: '#F4F7F8', elevation: 20},
   header: {
     backgroundColor: '#fff',
     paddingHorizontal: 15,
