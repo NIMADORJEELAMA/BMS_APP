@@ -1,6 +1,13 @@
 import React, {useState, useRef} from 'react';
-import {StyleSheet, TouchableOpacity, FlatList, Animated} from 'react-native';
-import {Text, Div} from './common/UI';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  Animated,
+  Text,
+} from 'react-native';
+import {Div} from './common/UI';
+import ArrowDownIcon from '../assets/Icons/chevrondown.svg'; // Adjust path
 
 interface DropdownOption {
   label: string;
@@ -62,7 +69,7 @@ const CustomDropdown = ({
         </Text>
         <Animated.Text
           style={[styles.arrow, {transform: [{rotate: rotation}]}]}>
-          ▾
+          <ArrowDownIcon width={12} height={12} fill="#94A3B8" />
         </Animated.Text>
       </TouchableOpacity>
 
@@ -88,9 +95,9 @@ const CustomDropdown = ({
                   ]}>
                   {item.label}
                 </Text>
-                {item.value === selectedValue && (
+                {/* {item.value === selectedValue && (
                   <Div style={styles.activeDot} />
-                )}
+                )} */}
               </TouchableOpacity>
             )}
           />
@@ -115,8 +122,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 14,
+    paddingVertical: 6,
+    borderRadius: 8,
     borderWidth: 1.5,
     borderColor: '#f1f5f9',
     // Soft shadow
@@ -131,38 +138,44 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
   },
-  triggerText: {fontSize: 14, color: '#1e293b', fontWeight: '700'},
+  triggerText: {fontSize: 12, color: '#1e293b', fontWeight: '700'},
   arrow: {fontSize: 14, color: '#333', fontWeight: 'bold'},
   dropdownList: {
     position: 'absolute',
     top: '100%',
     left: 0,
     right: 0,
+    zIndex: 9999, // Highest in the app
+    elevation: 6,
     backgroundColor: '#fff',
-    borderBottomLeftRadius: 14,
-    borderBottomRightRadius: 14,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
     borderWidth: 1.5,
     borderTopWidth: 0,
     borderColor: '#f7f7f7',
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 10},
     shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 10,
+    shadowRadius: 6,
   },
   optionItem: {
-    padding: 8,
+    padding: 6,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomWidth: 1,
+    // borderBottomWidth: 1,
     borderBottomColor: '#f8fafc',
   },
   selectedOption: {
     backgroundColor: '#ececec',
   },
-  optionText: {fontSize: 14, color: '#475569', fontWeight: '600'},
-  selectedOptionText: {color: '#000', fontWeight: '800'},
+  optionText: {
+    fontSize: 12,
+    color: '#475569',
+    fontWeight: '600',
+    paddingVertical: 3,
+  },
+  selectedOptionText: {color: '#000', fontWeight: '700'},
   activeDot: {
     width: 6,
     height: 6,

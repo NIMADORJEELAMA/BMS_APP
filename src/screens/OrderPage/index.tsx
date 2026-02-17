@@ -6,8 +6,11 @@ import {
   FlatList,
   Dimensions,
   StatusBar,
+  View,
+  Text,
+  ScrollView,
 } from 'react-native';
-import {Text, Div} from '../../components/common/UI';
+import {Div} from '../../components/common/UI';
 import MainLayout from '../../screens/MainLayout';
 import {orderService} from '../../services/orderService';
 import {useDispatch, useSelector} from 'react-redux';
@@ -15,6 +18,11 @@ import {updateCartQuantity} from '../../redux/slices/cartSlice';
 import {RootState} from '../../redux/store';
 import {useNavigation} from '@react-navigation/native';
 import ViewOrderModal from './ViewOrderModal';
+import SearchBar from '../../components/Searchbar';
+import swiggyColors from '../../assets/Color/swiggyColor';
+import CustomDropdown from '../../components/CustomDropdown';
+import Cart from '../../assets/Icons/cart.svg'; // Adjust path
+import BackIcon from '../../assets/Icons/left-arrow.svg'; // Adjust path
 
 const screenWidth = Dimensions.get('window').width;
 const itemWidth = (screenWidth - 48) / 3; // Precise spacing for 3-column grid
@@ -29,7 +37,7 @@ const OrderPage = ({route}: any) => {
   const [isVegOnly, setIsVegOnly] = useState(false);
   const [selectedType, setSelectedType] = useState<'FOOD' | 'ALCOHOL'>('FOOD');
   const [modalVisible, setModalVisible] = useState(false);
-
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
   // Redux
   const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
@@ -52,8 +60,15 @@ const OrderPage = ({route}: any) => {
     };
     fetchMenu();
   }, []);
-
-  // Filter Logic
+  const categoriesList = useMemo(() => {
+    const uniqueCats = Array.from(
+      new Set(menuItems.map(item => item.category)),
+    );
+    return [
+      {label: 'All Categories', value: 'ALL'},
+      ...uniqueCats.map(cat => ({label: cat, value: cat})),
+    ];
+  }, [menuItems]);
   const filteredItems = useMemo(() => {
     return menuItems.filter(item => {
       const matchesSearch = item.name
@@ -61,10 +76,14 @@ const OrderPage = ({route}: any) => {
         .includes(search.toLowerCase());
       const matchesVeg = isVegOnly ? item.isVeg === true : true;
       const matchesType = item.type === selectedType;
-      return matchesSearch && matchesVeg && matchesType;
-    });
-  }, [search, isVegOnly, selectedType, menuItems]);
 
+      // New Category Filter
+      const matchesCategory =
+        selectedCategory === 'ALL' || item.category === selectedCategory;
+
+      return matchesSearch && matchesVeg && matchesType && matchesCategory;
+    });
+  }, [search, isVegOnly, selectedType, selectedCategory, menuItems]);
   const handleQtyChange = (item: any, delta: number) => {
     dispatch(updateCartQuantity({item, delta}));
   };
@@ -72,332 +91,517 @@ const OrderPage = ({route}: any) => {
   // Header Cart Icon Component
   const CartIcon = () => (
     <TouchableOpacity
-      onPress={() =>
-        navigation.navigate('CartScreen', {
-          tableId: table.id,
-          tableName: table.name,
-          table: table,
-        })
-      }
-      style={styles.cartContainer}>
-      <Text style={{fontSize: 22}}>🛒</Text>
+      activeOpacity={0.8}
+      onPress={() => navigation.navigate('CartScreen', {table})}
+      style={styles.cartHeaderBtn}>
+      {/* Replace emoji with SVG if possible */}
+      <Text style={{fontSize: 22}}>
+        <Cart height={24} />
+      </Text>
       {totalCartCount > 0 && (
-        <Div style={styles.badge}>
+        <View style={styles.badge}>
           <Text style={styles.badgeText}>{totalCartCount}</Text>
-        </Div>
+        </View>
       )}
     </TouchableOpacity>
   );
 
   const renderGridItem = ({item}: any) => {
+    console.log('item', item);
     const quantity = cartItems[item.id]?.quantity || 0;
 
     return (
-      <Div style={styles.card}>
-        {/* Veg/Non-Veg Marker */}
-        <Div
-          style={[
-            styles.vegMarker,
-            {borderColor: item.isVeg ? '#27ae60' : '#c0392b'},
-          ]}>
-          <Div
+      <View style={styles.swiggyCard}>
+        {/* Veg/Non-Veg Marker - Top Left */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 6,
+          }}>
+          <View
             style={[
-              styles.vegDot,
-              {backgroundColor: item.isVeg ? '#27ae60' : '#c0392b'},
-            ]}
-          />
-        </Div>
+              styles.marker,
+              {
+                borderColor: item.isVeg
+                  ? swiggyColors.veg
+                  : swiggyColors.nonVeg,
+              },
+            ]}>
+            <View
+              style={[
+                styles.dot,
+                {
+                  backgroundColor: item.isVeg
+                    ? swiggyColors.veg
+                    : swiggyColors.nonVeg,
+                },
+              ]}
+            />
+          </View>
+          <View>
+            <Text style={styles.itemCategory}>{item.category}</Text>
+          </View>
+        </View>
+        {/* Item Info */}
+        <View style={styles.itemInfo}>
+          <Text style={styles.itemName} numberOfLines={2}>
+            {item.name}
+          </Text>
+        </View>
 
-        <Text style={styles.itemName} numberOfLines={2}>
-          {item.name}
-        </Text>
-        <Text style={styles.itemCategory}>{item.category}</Text>
+        <View style={styles.cardFooter}>
+          <View style={{alignSelf: 'flex-start'}}>
+            <Text style={styles.itemPrice}>₹{item.price}</Text>
+          </View>
 
-        <Div style={styles.cardFooter}>
-          <Text style={styles.itemPrice}>₹{item.price}</Text>
-
-          {quantity === 0 ? (
-            <TouchableOpacity
-              style={styles.addBtn}
-              onPress={() => handleQtyChange(item, 1)}>
-              <Text style={styles.addBtnText}>ADD</Text>
-            </TouchableOpacity>
-          ) : (
-            <Div style={styles.qtyControls}>
+          {/* Dynamic Button Section */}
+          <View style={styles.buttonWrapper}>
+            {quantity === 0 ? (
               <TouchableOpacity
-                style={styles.qtyTouch}
-                onPress={() => handleQtyChange(item, -1)}>
-                <Text style={styles.qtyActionText}>−</Text>
-              </TouchableOpacity>
-              <Text style={styles.qtyValueText}>{quantity}</Text>
-              <TouchableOpacity
-                style={styles.qtyTouch}
+                activeOpacity={0.8}
+                style={styles.swiggyAddBtn}
                 onPress={() => handleQtyChange(item, 1)}>
-                <Text style={styles.qtyActionText}>+</Text>
+                <Text style={styles.addBtnText}>ADD</Text>
+                <Text style={styles.plusSign}>+</Text>
               </TouchableOpacity>
-            </Div>
-          )}
-        </Div>
-      </Div>
+            ) : (
+              <View style={styles.swiggyQtyBtn}>
+                <TouchableOpacity
+                  onPress={() => handleQtyChange(item, -1)}
+                  style={styles.qtyTouch}>
+                  <Text style={styles.qtyActionText}>−</Text>
+                </TouchableOpacity>
+
+                <Text style={styles.qtyValueText}>{quantity}</Text>
+
+                <TouchableOpacity
+                  onPress={() => handleQtyChange(item, 1)}
+                  style={styles.qtyTouch}>
+                  <Text style={styles.qtyActionText}>+</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </View>
+      </View>
     );
   };
 
   return (
     <MainLayout
-      title={`Table ${table.name || table.number}`}
+      title={`${table.name || table.number}`}
       showBack
       rightComponent={<CartIcon />}>
       <StatusBar barStyle="dark-content" />
-      <Div p={12} flex={1} bg="#F8F9FA">
-        {/* Search & Veg Toggle */}
-        <Div style={styles.searchRow}>
-          <TextInput
-            style={styles.searchBar}
-            placeholder="Search menu..."
-            placeholderTextColor="#999"
-            onChangeText={setSearch}
-          />
-          <TouchableOpacity
-            style={[styles.vegBtn, isVegOnly && styles.vegBtnActive]}
-            onPress={() => setIsVegOnly(!isVegOnly)}>
-            <Div
-              style={[
-                styles.vegDot,
-                {
-                  backgroundColor: isVegOnly ? '#27ae60' : '#BBB',
-                  marginRight: 4,
-                },
-              ]}
-            />
-            <Text
-              style={[
-                styles.vegBtnLabel,
-                {color: isVegOnly ? '#27ae60' : '#888'},
-              ]}>
-              VEG
-            </Text>
-          </TouchableOpacity>
-        </Div>
 
-        {/* Action Buttons */}
-        <Div style={styles.buttonRow}>
-          <TouchableOpacity
-            style={styles.currentOrderBtn}
-            onPress={() => setModalVisible(true)}>
-            <Text style={styles.btnText}>View Active Order</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.dropBtn}>
-            <Text style={styles.btnText}>▼</Text>
-          </TouchableOpacity>
-        </Div>
+      <View style={{flex: 1, backgroundColor: '#FBFBFE'}}>
+        <View style={styles.headerContainer}>
+          {/* Search Row */}
+          <View style={styles.searchRowContainer}>
+            <View style={{flex: 1}}>
+              <SearchBar
+                value={search}
+                onChangeText={setSearch}
+                placeholder="Search menu..."
+              />
+            </View>
 
-        {/* Type Slider */}
-        <Div style={styles.slider}>
-          {['FOOD', 'ALCOHOL'].map((t: any) => (
             <TouchableOpacity
-              key={t}
-              style={[styles.sliderTab, selectedType === t && styles.activeTab]}
-              onPress={() => setSelectedType(t)}>
+              activeOpacity={0.7}
+              style={[styles.vegToggle, isVegOnly && styles.vegToggleActive]}
+              onPress={() => setIsVegOnly(!isVegOnly)}>
+              <View
+                style={[
+                  styles.vegBox,
+                  {borderColor: isVegOnly ? swiggyColors.veg : '#CBD5E1'},
+                ]}>
+                <View
+                  style={[
+                    styles.vegInnerDot,
+                    {
+                      backgroundColor: isVegOnly
+                        ? swiggyColors.veg
+                        : 'transparent',
+                    },
+                  ]}
+                />
+              </View>
               <Text
                 style={[
-                  styles.tabText,
-                  selectedType === t && styles.activeTabText,
+                  styles.vegToggleLabel,
+                  isVegOnly && {color: swiggyColors.veg},
                 ]}>
-                {t}
+                VEG
               </Text>
             </TouchableOpacity>
-          ))}
-        </Div>
+          </View>
+
+          {/* Horizontal Scroll Filters */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{overflow: 'visible'}}
+            contentContainerStyle={styles.filterScroll}>
+            {/* Food/Alcohol Toggle */}
+            <View style={styles.slider}>
+              {['FOOD', 'ALCOHOL'].map((t: any) => (
+                <TouchableOpacity
+                  key={t}
+                  style={[
+                    styles.sliderTab,
+                    selectedType === t && styles.activeTab,
+                  ]}
+                  onPress={() => setSelectedType(t)}>
+                  <Text
+                    style={[
+                      styles.tabText,
+                      selectedType === t && styles.activeTabText,
+                    ]}>
+                    {t}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Category Dropdown as a Chip */}
+            <View style={styles.dropdownWrapper}>
+              <CustomDropdown
+                options={categoriesList}
+                selectedValue={selectedCategory}
+                onSelect={val => setSelectedCategory(val)}
+                placeholder="Category"
+              />
+            </View>
+
+            {/* View Order Action */}
+            <TouchableOpacity
+              style={styles.headerActionBtn}
+              onPress={() => setModalVisible(true)}>
+              <Text style={styles.headerActionBtnText}>Active Order</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
 
         <FlatList
           data={filteredItems}
           keyExtractor={item => item.id}
           renderItem={renderGridItem}
           numColumns={3}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{paddingBottom: 40}}
+          columnWrapperStyle={styles.gridRow}
+          contentContainerStyle={{padding: 12, paddingBottom: 100}}
           ListEmptyComponent={
             <Div center mt={50}>
-              <Text style={{color: '#999'}}>
-                No items found matching your search.
-              </Text>
+              <Text style={{color: '#94A3B8'}}>No items found.</Text>
             </Div>
           }
         />
-      </Div>
+      </View>
 
-      {/* Existing Orders Live State Modal */}
       <ViewOrderModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         table={table}
-        onRefresh={() => {}} // Hook this to fetchActiveOrders if needed
       />
     </MainLayout>
   );
 };
 
 const styles = StyleSheet.create({
-  cartContainer: {
-    padding: 5,
+  headerContainer: {
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+    zIndex: 5000,
     position: 'relative',
+    // elevation: 1,
   },
+  searchRowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    gap: 10,
+  },
+  filterScroll: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+    overflow: 'visible',
+    // marginBottom: 80,
+  },
+  slider: {
+    flexDirection: 'row',
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    padding: 3,
+    marginRight: 10,
+    width: 160, // Fixed width for the toggle
+  },
+  sliderTab: {
+    flex: 1,
+    paddingVertical: 6,
+    alignItems: 'center',
+    borderRadius: 9,
+  },
+  activeTab: {
+    backgroundColor: '#FFF',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+  },
+  tabText: {fontSize: 11, fontWeight: '700', color: '#94A3B8'},
+  activeTabText: {color: '#FC8019'}, // Swiggy Orange
+
+  dropdownWrapper: {
+    minWidth: 130,
+    marginRight: 10,
+    overflow: 'visible',
+    zIndex: 6000, // Higher than headerContainer
+  },
+  headerActionBtn: {
+    backgroundColor: '#1E293B',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  headerActionBtnText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
+  filterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginRight: 8,
+  },
+  activeFilterChip: {
+    borderColor: '#FC8019',
+    backgroundColor: '#FFF5EE', // Very light orange tint
+  },
+  activeVegChip: {
+    borderColor: '#60B246',
+    backgroundColor: '#F0FDF4',
+  },
+  filterChipText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#3D4152', // Swiggy's deep grey for text
+  },
+  activeFilterText: {
+    color: '#FC8019',
+  },
+  // Veg Icon Styling
+  vegBox: {
+    width: 10,
+    height: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 6,
+    borderRadius: 2,
+  },
+  vegDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+
+  // Modern Veg Toggle
+  vegToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: 6,
+    height: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  vegToggleActive: {
+    borderColor: '#27ae60',
+    backgroundColor: '#F0FDF4',
+  },
+
+  vegInnerDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 3,
+  },
+  vegToggleLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  // Action Row
+  actionRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  currentOrderBtn: {
+    flex: 1,
+    backgroundColor: '#fa2c37',
+    height: 48,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 2,
+  },
+  historyBtn: {
+    width: 48,
+    height: 48,
+    backgroundColor: '#1E293B',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Slider
+
+  // Grid Item
+  gridRow: {
+    justifyContent: 'flex-start',
+  },
+
+  // Badge
+  cartHeaderBtn: {padding: 8},
   badge: {
     position: 'absolute',
-    right: -4,
-    top: -2,
+    top: 2,
+    right: 0,
     backgroundColor: '#fa2c37',
     borderRadius: 10,
     minWidth: 18,
     height: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4,
     borderWidth: 2,
     borderColor: '#FFF',
-  },
-  badgeText: {
-    color: '#FFF',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  searchRow: {flexDirection: 'row', marginBottom: 12},
-  searchBar: {
-    flex: 0.75,
-    backgroundColor: '#FFF',
-    padding: 10,
-    borderRadius: 10,
-    marginRight: 8,
-    elevation: 2,
-    color: '#333',
-  },
-  vegBtn: {
-    flex: 0.25,
-    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#DDD',
-    borderRadius: 10,
-    backgroundColor: '#FFF',
   },
-  vegBtnActive: {borderColor: '#27ae60', backgroundColor: '#E8F5E9'},
-  vegBtnLabel: {fontSize: 10, fontWeight: '800'},
-  buttonRow: {flexDirection: 'row', marginBottom: 12},
-  currentOrderBtn: {
-    flex: 1,
-    backgroundColor: '#fa2c37',
-    paddingVertical: 14,
-    borderRadius: 10,
-    marginRight: 8,
-    alignItems: 'center',
-    elevation: 4,
-  },
-  dropBtn: {
-    width: 45,
-    backgroundColor: '#333',
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 2,
-  },
-  btnText: {color: '#FFF', fontWeight: 'bold', fontSize: 13},
-  slider: {
-    flexDirection: 'row',
-    backgroundColor: '#E9ECEF',
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: 16,
-  },
-  sliderTab: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    borderRadius: 10,
-  },
-  activeTab: {
-    backgroundColor: '#FFF',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-  },
-  tabText: {fontWeight: 'bold', color: '#6C757D', fontSize: 12},
-  activeTabText: {color: '#fa2c37'},
-  card: {
+  badgeText: {color: '#FFF', fontSize: 9, fontWeight: '900'},
+  swiggyCard: {
     width: itemWidth,
     margin: 4,
-    backgroundColor: '#FFF',
-    padding: 10,
-    borderRadius: 14,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.08,
-    shadowRadius: 1,
-    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    padding: 12,
+    borderRadius: 16,
+    // Refined Shadow
+    shadowColor: '#282C3F',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
     justifyContent: 'space-between',
-    minHeight: 155,
+    minHeight: 160,
   },
-  vegMarker: {
-    borderWidth: 1,
-    padding: 2,
-    borderRadius: 4,
-    alignSelf: 'flex-start',
-    marginBottom: 4,
+  marker: {
+    width: 14,
+    height: 14,
+    borderWidth: 1.5,
+    borderRadius: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // marginBottom: 8,
   },
-  vegDot: {width: 6, height: 6, borderRadius: 3},
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  itemInfo: {
+    flex: 1,
+    marginBottom: 0,
+  },
   itemName: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#212529',
-    textAlign: 'center',
-    marginTop: 4,
-    height: 36,
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#3D4152', // Deep grey
+    lineHeight: 18,
   },
   itemCategory: {
-    fontSize: 8,
-    color: '#ADB5BD',
+    fontSize: 10,
+    color: '#7E808C',
     fontWeight: '600',
-    textTransform: 'uppercase',
+    marginTop: 2,
+    textTransform: 'capitalize',
   },
-  cardFooter: {width: '100%', alignItems: 'center', marginTop: 8},
-  itemPrice: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#495057',
-    marginBottom: 4,
-  },
-  addBtn: {
-    backgroundColor: '#FFF',
-    borderWidth: 1,
-    borderColor: '#fa2c37',
-    width: '100%',
-    paddingVertical: 5,
-    borderRadius: 6,
+  cardFooter: {
     alignItems: 'center',
+    marginTop: 'auto',
   },
-  addBtnText: {color: '#fa2c37', fontSize: 10, fontWeight: 'bold'},
-  qtyControls: {
-    flexDirection: 'row',
-    backgroundColor: '#fa2c37',
+  itemPrice: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#3D4152',
+    marginBottom: 8,
+    alignContent: 'flex-start',
+  },
+  buttonWrapper: {
     width: '100%',
-    borderRadius: 6,
+    height: 36,
+  },
+  // ADD Button Styling
+  swiggyAddBtn: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D4D5D9',
+    borderRadius: 8,
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    // Button Shadow
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    elevation: 2,
+  },
+  addBtnText: {
+    color: '#60B246', // Swiggy uses Green for 'ADD'
+    fontWeight: '900',
+    fontSize: 13,
+  },
+  plusSign: {
+    position: 'absolute',
+    right: 8,
+    top: 2,
+    color: '#60B246',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  // Qty Selector Styling
+  swiggyQtyBtn: {
+    flexDirection: 'row',
+    backgroundColor: '#60B246', // Swiggy uses green for active qty controls
+    borderRadius: 8,
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'space-between',
     overflow: 'hidden',
   },
   qtyTouch: {
-    paddingVertical: 5,
-    paddingHorizontal: 8,
     flex: 1,
+    height: '100%',
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  qtyActionText: {color: '#FFF', fontSize: 14, fontWeight: 'bold'},
+  qtyActionText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '700',
+  },
   qtyValueText: {
-    color: '#FFF',
-    fontSize: 11,
-    fontWeight: 'bold',
-    minWidth: 18,
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '900',
+    minWidth: 20,
     textAlign: 'center',
   },
 });

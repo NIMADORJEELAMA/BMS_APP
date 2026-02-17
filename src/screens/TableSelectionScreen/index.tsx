@@ -15,7 +15,9 @@ import {Text, Div} from '../../components/common/UI';
 import MainLayout from '../MainLayout';
 import {tableService} from '../../services/tableService';
 import CustomDropdown from '../../components/CustomDropdown';
-import Icon from 'react-native-vector-icons/Ionicons';
+
+import ProfileIcon from '../../assets/Icons/profile.svg'; // Adjust path
+import SearchBar from '../../components/Searchbar';
 const {width} = Dimensions.get('window');
 const ITEM_WIDTH = (width - 40) / 2;
 
@@ -148,21 +150,27 @@ const TableSelectionScreen = ({navigation}: any) => {
         <Div row align="center">
           <TouchableOpacity
             onPress={() => navigation.navigate('Profile')}
-            style={styles.profileCircle}></TouchableOpacity>
+            style={styles.profileCircle}>
+            <ProfileIcon width={18} height={18} fill="#94A3B8" />
+          </TouchableOpacity>
         </Div>
       }>
       <View style={styles.headerContainer}>
         {/* Search Bar */}
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search tables..."
-          placeholderTextColor="#94A3B8"
+
+        <SearchBar
           value={search}
           onChangeText={setSearch}
+          placeholder="Search tables..."
+          style={{marginBottom: 12}} // Optional: override or add spacing
         />
 
         {/* Filter Row: Aligned side by side */}
         <View style={styles.filterRow}>
+          <View style={styles.statusBox}>
+            <StatusFilters />
+          </View>
+
           <View style={styles.dropdownBox}>
             <CustomDropdown
               options={categories}
@@ -170,10 +178,6 @@ const TableSelectionScreen = ({navigation}: any) => {
               onSelect={val => setSelectedCategory(val)}
               placeholder="Area"
             />
-          </View>
-
-          <View style={styles.statusBox}>
-            <StatusFilters />
           </View>
         </View>
       </View>
@@ -214,6 +218,31 @@ const TableSelectionScreen = ({navigation}: any) => {
 };
 
 const styles = StyleSheet.create({
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 12,
+    height: 48,
+    marginBottom: 12,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1, // Takes all available space between icons
+    height: '100%',
+    fontSize: 15,
+    color: '#1E293B',
+    paddingVertical: 0, // Critical for Android vertical centering
+  },
+  clearButton: {
+    padding: 4,
+    marginLeft: 4,
+  },
   profileCircle: {
     width: 36,
     height: 36,
@@ -242,17 +271,7 @@ const styles = StyleSheet.create({
       android: {elevation: 6},
     }),
   },
-  searchInput: {
-    backgroundColor: '#F8FAFC',
-    height: 48,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    fontSize: 15,
-    marginBottom: 12,
-    color: '#1E293B',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
+
   filterRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

@@ -10,6 +10,7 @@ import {
 import {Text} from './../components/common/UI';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import BackIcon from '../assets/Icons/left-arrow.svg'; // Adjust path
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -56,7 +57,7 @@ const MainLayout = ({
               <TouchableOpacity
                 onPress={() => navigation.goBack()}
                 style={styles.iconButton}>
-                <Text style={styles.backIcon}>←</Text>
+                <BackIcon height={14} />
               </TouchableOpacity>
             ) : null}
           </View>
