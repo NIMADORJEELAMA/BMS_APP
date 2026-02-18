@@ -1,8 +1,8 @@
+// socket.js or within the file
 import {io} from 'socket.io-client';
 
-// Replace with your local IP if testing on a physical device
-const SOCKET_URL = 'http://localhost:3000';
-
+const SOCKET_URL = 'http://192.168.29.142:3000'; // Use your machine's IP for physical devices!
 export const socket = io(SOCKET_URL, {
-  autoConnect: false, // We will connect manually on login
+  autoConnect: true,
+  transports: ['websocket'], // Faster for mobile
 });

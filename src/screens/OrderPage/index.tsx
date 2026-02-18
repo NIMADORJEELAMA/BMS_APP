@@ -1,7 +1,6 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useState, useEffect, useMemo, useCallback} from 'react';
 import {
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   FlatList,
   Dimensions,
@@ -9,27 +8,33 @@ import {
   View,
   Text,
   ScrollView,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import {Div} from '../../components/common/UI';
 import MainLayout from '../../screens/MainLayout';
 import {orderService} from '../../services/orderService';
 import {useDispatch, useSelector} from 'react-redux';
-import {updateCartQuantity} from '../../redux/slices/cartSlice';
+import {clearCart, updateCartQuantity} from '../../redux/slices/cartSlice';
 import {RootState} from '../../redux/store';
 import {useNavigation} from '@react-navigation/native';
 import ViewOrderModal from './ViewOrderModal';
 import SearchBar from '../../components/Searchbar';
 import swiggyColors from '../../assets/Color/swiggyColor';
 import CustomDropdown from '../../components/CustomDropdown';
-import Cart from '../../assets/Icons/cart.svg'; // Adjust path
-import BackIcon from '../../assets/Icons/left-arrow.svg'; // Adjust path
+import CartEmpty from '../../assets/Icons/empty-cart.svg'; // Adjust path
+import Cart from '../../assets/Icons/cart.svg';
 
+import color from '../../assets/Color/color';
+import Toast from 'react-native-toast-message';
 const screenWidth = Dimensions.get('window').width;
 const itemWidth = (screenWidth - 48) / 3; // Precise spacing for 3-column grid
 
 const OrderPage = ({route}: any) => {
   const navigation = useNavigation<any>();
   const {table} = route.params;
+  console.log('table', table);
+  const tableId = table.id;
 
   // State
   const [menuItems, setMenuItems] = useState<any[]>([]);
@@ -38,6 +43,8 @@ const OrderPage = ({route}: any) => {
   const [selectedType, setSelectedType] = useState<'FOOD' | 'ALCOHOL'>('FOOD');
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [isOrdering, setIsOrdering] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   // Redux
   const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
@@ -47,6 +54,7 @@ const OrderPage = ({route}: any) => {
     0,
   );
 
+  const itemList = Object.values(cartItems);
   // Fetch Menu on Mount
   useEffect(() => {
     const fetchMenu = async () => {
@@ -60,6 +68,63 @@ const OrderPage = ({route}: any) => {
     };
     fetchMenu();
   }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      const data = await orderService.getMenu();
+      setMenuItems(data.filter((item: any) => item.isActive));
+    } catch (err) {
+      console.error('Failed to refresh menu:', err);
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
+  const handlePlaceOrder = async () => {
+    if (itemList.length === 0) {
+      Toast.show({
+        type: 'error',
+        text1: 'Empty Cart',
+        text2: 'Please add items before placing an order.',
+      });
+      return;
+    }
+    setIsOrdering(true);
+    try {
+      const payload = {
+        tableId: tableId,
+        items: itemList.map(item => ({
+          menuItemId: item.id,
+          quantity: item.quantity,
+        })),
+      };
+      console.log('payload', payload);
+      await orderService.createOrder(payload);
+      Toast.show({
+        type: 'success',
+        text1: 'Order Placed!',
+        text2: 'The kitchen has received your order.',
+        position: 'top',
+        topOffset: 50,
+        // Pass custom data here
+        props: {
+          backgroundColor: swiggyColors.veg,
+        },
+      });
+      dispatch(clearCart());
+      // navigation.goBack();
+    } catch (err) {
+      Toast.show({
+        type: 'error',
+        text1: 'Order Failed',
+        text2: 'Could not connect to the kitchen. Please try again.',
+        position: 'top',
+        topOffset: 50,
+      });
+    } finally {
+      setIsOrdering(false);
+    }
+  };
   const categoriesList = useMemo(() => {
     const uniqueCats = Array.from(
       new Set(menuItems.map(item => item.category)),
@@ -96,7 +161,7 @@ const OrderPage = ({route}: any) => {
       style={styles.cartHeaderBtn}>
       {/* Replace emoji with SVG if possible */}
       <Text style={{fontSize: 22}}>
-        <Cart height={24} />
+        <Cart height={24} fill={color.dark} />
       </Text>
       {totalCartCount > 0 && (
         <View style={styles.badge}>
@@ -290,7 +355,15 @@ const OrderPage = ({route}: any) => {
           renderItem={renderGridItem}
           numColumns={3}
           columnWrapperStyle={styles.gridRow}
-          contentContainerStyle={{padding: 12, paddingBottom: 100}}
+          contentContainerStyle={{padding: 12, paddingBottom: 10}}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[swiggyColors.veg]} // Android spinner color
+              tintColor={swiggyColors.veg} // iOS spinner color
+            />
+          }
           ListEmptyComponent={
             <Div center mt={50}>
               <Text style={{color: '#94A3B8'}}>No items found.</Text>
@@ -299,6 +372,45 @@ const OrderPage = ({route}: any) => {
         />
       </View>
 
+      {totalCartCount > 0 && (
+        <View style={styles.footerContainer}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => dispatch(clearCart())}
+            style={styles.footerCartBtn}>
+            <CartEmpty height={20} width={20} fill={color.dark} />
+            <Text style={styles.textCart}>Clear Cart</Text>
+          </TouchableOpacity>
+          {/* <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('CartScreen', {table})}
+            style={styles.footerCartBtn}>
+            <Cart height={24} width={24} fill="#1E293B" />
+            {totalCartCount > 0 && (
+              <View style={styles.footerBadge}>
+                <Text style={styles.badgeText}>{totalCartCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity> */}
+
+          <TouchableOpacity
+            activeOpacity={0.9}
+            style={[
+              styles.confirmBtn,
+              isOrdering && {backgroundColor: swiggyColors.textSecondary},
+            ]}
+            onPress={handlePlaceOrder}
+            disabled={isOrdering}>
+            <View style={styles.btnContent}>
+              {!isOrdering ? (
+                <Text style={styles.btnAction}>CONFIRM ORDER</Text>
+              ) : (
+                <ActivityIndicator color={swiggyColors.background} />
+              )}
+            </View>
+          </TouchableOpacity>
+        </View>
+      )}
       <ViewOrderModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
@@ -390,7 +502,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF5EE', // Very light orange tint
   },
   activeVegChip: {
-    borderColor: '#60B246',
+    borderColor: swiggyColors.veg,
     backgroundColor: '#F0FDF4',
   },
   filterChipText: {
@@ -566,7 +678,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   addBtnText: {
-    color: '#60B246', // Swiggy uses Green for 'ADD'
+    color: swiggyColors.veg,
     fontWeight: '900',
     fontSize: 13,
   },
@@ -574,14 +686,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 8,
     top: 2,
-    color: '#60B246',
+    color: swiggyColors.veg,
     fontSize: 12,
     fontWeight: '900',
   },
   // Qty Selector Styling
   swiggyQtyBtn: {
     flexDirection: 'row',
-    backgroundColor: '#60B246', // Swiggy uses green for active qty controls
+    backgroundColor: swiggyColors.veg, // Swiggy uses green for active qty controls
     borderRadius: 8,
     height: '100%',
     alignItems: 'center',
@@ -605,6 +717,72 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     minWidth: 20,
     textAlign: 'center',
+  },
+
+  //footer
+  footerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    // Border for subtle separation
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    // Ensures it sits at the very bottom
+    paddingBottom: 36,
+    gap: 12,
+  },
+  footerCartBtn: {
+    flex: 0.2, // 20% width
+    height: 52,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  textCart: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  footerBadge: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    backgroundColor: '#fa2c37',
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  confirmBtn: {
+    flex: 0.8, // 80% width
+    height: 52,
+    backgroundColor: color.dark, // Success Green
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // Shadow/Elevation
+    shadowColor: color.dark,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  btnContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  btnAction: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: 0.8,
   },
 });
 

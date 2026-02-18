@@ -21,6 +21,8 @@ import CustomDropdown from '../../components/CustomDropdown';
 import ProfileIcon from '../../assets/Icons/profile.svg'; // Adjust path
 import SearchBar from '../../components/Searchbar';
 import swiggyColors from '../../assets/Color/swiggyColor';
+import {socket} from '../../services/socketService';
+import Toast from 'react-native-toast-message';
 const {width} = Dimensions.get('window');
 const ITEM_WIDTH = (width - 40) / 2;
 
@@ -63,6 +65,37 @@ const TableSelectionScreen = ({navigation}: any) => {
 
   useEffect(() => {
     loadInitialData();
+  }, []);
+  useEffect(() => {
+    // Connect socket if not connected
+    if (!socket.connected) socket.connect();
+
+    const handleUpdate = () => {
+      console.log('Socket event received: Refreshing tables...');
+      loadInitialData(); // Re-fetch the data from API
+    };
+
+    // Listen for the same events as your Web dashboard
+    socket.on('tableUpdated', handleUpdate);
+    socket.on('newOrder', handleUpdate);
+    socket.on('itemStatusUpdated', data => {
+      console.log('data', data);
+      if (data.status === 'READY') {
+        loadInitialData();
+        Toast.show({
+          type: 'info',
+          text1: ' Kitchen Update',
+          text2: `Order for Table ${data.tableNumber} is ready!`,
+          visibilityTime: 4000,
+        });
+      }
+    });
+
+    return () => {
+      socket.off('tableUpdated', handleUpdate);
+      socket.off('newOrder', handleUpdate);
+      socket.off('itemStatusUpdated', handleUpdate);
+    };
   }, []);
 
   const filteredTables = useMemo(() => {

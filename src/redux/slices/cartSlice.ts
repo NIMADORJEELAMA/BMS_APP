@@ -5,6 +5,7 @@ interface CartItem {
   name: string;
   price: number;
   quantity: number;
+  isVeg: boolean;
 }
 
 interface CartState {
@@ -42,6 +43,7 @@ const cartSlice = createSlice({
           name: item.name,
           price: item.price,
           quantity: 1,
+          isVeg: item.isVeg,
         };
       }
     },

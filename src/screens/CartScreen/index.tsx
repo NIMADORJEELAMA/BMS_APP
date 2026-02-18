@@ -14,6 +14,8 @@ import {RootState} from '../../redux/store';
 import {updateCartQuantity, clearCart} from '../../redux/slices/cartSlice';
 import {orderService} from '../../services/orderService';
 import swiggyColors from '../../assets/Color/swiggyColor';
+import Toast from 'react-native-toast-message';
+import color from '../../assets/Color/color';
 
 const CartScreen = ({route, navigation}: any) => {
   const {table} = route.params;
@@ -22,6 +24,7 @@ const CartScreen = ({route, navigation}: any) => {
   const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const [isOrdering, setIsOrdering] = useState(false);
+  console.log('cartItems', cartItems);
 
   const itemList = Object.values(cartItems);
   const totalAmount = itemList.reduce(
@@ -30,7 +33,14 @@ const CartScreen = ({route, navigation}: any) => {
   );
 
   const handlePlaceOrder = async () => {
-    if (itemList.length === 0) return;
+    if (itemList.length === 0) {
+      Toast.show({
+        type: 'error',
+        text1: 'Empty Cart',
+        text2: 'Please add items before placing an order.',
+      });
+      return;
+    }
     setIsOrdering(true);
     try {
       const payload = {
@@ -42,16 +52,31 @@ const CartScreen = ({route, navigation}: any) => {
       };
       console.log('payload', payload);
       await orderService.createOrder(payload);
-      Alert.alert('Success', 'Order sent to kitchen!');
+      Toast.show({
+        type: 'success',
+        text1: 'Order Placed!',
+        text2: 'The kitchen has received your order.',
+        position: 'top',
+        topOffset: 50,
+        // Pass custom data here
+        props: {
+          backgroundColor: swiggyColors.veg,
+        },
+      });
       dispatch(clearCart());
       navigation.goBack();
     } catch (err) {
-      Alert.alert('Error', 'Could not place order. Try again.');
+      Toast.show({
+        type: 'error',
+        text1: 'Order Failed',
+        text2: 'Could not connect to the kitchen. Please try again.',
+        position: 'top',
+        topOffset: 50,
+      });
     } finally {
       setIsOrdering(false);
     }
   };
-
   return (
     <MainLayout title="Review Order" subtitle={`${tableName}`} showBack>
       <View style={{flex: 1, backgroundColor: swiggyColors.surface}}>
@@ -59,6 +84,7 @@ const CartScreen = ({route, navigation}: any) => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{paddingBottom: 120}}>
           {/* Order Items Section */}
+
           <View style={styles.sectionCard}>
             {itemList.map(
               (item, index) => (
@@ -75,25 +101,25 @@ const CartScreen = ({route, navigation}: any) => {
                       <View
                         style={[
                           styles.marker,
-                          // {
-                          //   borderColor: item?.isVeg
-                          //     ? swiggyColors.veg
-                          //     : swiggyColors.nonVeg,
-                          // },
+                          {
+                            borderColor: item?.isVeg
+                              ? swiggyColors.veg
+                              : swiggyColors.nonVeg,
+                          },
                         ]}>
                         <View
-                        // style={[
-                        //   styles.dot,
-                        //   {
-                        //     backgroundColor: item?.isVeg
-                        //       ? swiggyColors.veg
-                        //       : swiggyColors.nonVeg,
-                        //   },
-                        // ]}
+                          style={[
+                            styles.dot,
+                            {
+                              backgroundColor: item?.isVeg
+                                ? swiggyColors.veg
+                                : swiggyColors.nonVeg,
+                            },
+                          ]}
                         />
-                        <Text style={styles.index}>
+                        {/* <Text style={styles.index}>
                           {index + 1} {'.'}
-                        </Text>
+                        </Text> */}
                       </View>
                       <View style={{marginLeft: 10}}>
                         <Text style={styles.itemName}>{item.name}</Text>
@@ -168,13 +194,13 @@ const CartScreen = ({route, navigation}: any) => {
                 ]}
                 onPress={handlePlaceOrder}
                 disabled={isOrdering}>
-                {isOrdering ? (
-                  <ActivityIndicator color={swiggyColors.background} />
-                ) : (
-                  <View style={styles.btnContent}>
+                <View style={styles.btnContent}>
+                  {!isOrdering ? (
                     <Text style={styles.btnAction}>CONFIRM ORDER</Text>
-                  </View>
-                )}
+                  ) : (
+                    <ActivityIndicator color={swiggyColors.background} />
+                  )}
+                </View>
               </TouchableOpacity>
             </View>
           </View>
@@ -206,17 +232,17 @@ const styles = StyleSheet.create({
   },
   itemMain: {flex: 1, flexDirection: 'row', alignItems: 'center'},
   marker: {
-    width: 20,
-    height: 20,
-    // borderWidth: 1.5,
-    borderRadius: 24,
+    width: 14,
+    height: 14,
+    borderWidth: 1.5,
+    borderRadius: 4,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: swiggyColors.primary,
+    // backgroundColor: swiggyColors.textSecondary,
   },
   dot: {width: 6, height: 6, borderRadius: 3},
   index: {fontSize: 12, fontWeight: '700', color: swiggyColors.background},
-  itemName: {fontSize: 15, fontWeight: '700', color: swiggyColors.textPrimary},
+  itemName: {fontSize: 14, fontWeight: '700', color: swiggyColors.textPrimary},
   itemPrice: {fontSize: 13, color: swiggyColors.textSecondary, marginTop: 2},
 
   qtyContainer: {
@@ -225,7 +251,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#D4D5D9',
     borderRadius: 8,
-    height: 34,
+    height: 32,
     backgroundColor: swiggyColors.background,
   },
   qtyBtn: {paddingHorizontal: 12, height: '100%', justifyContent: 'center'},
@@ -236,7 +262,22 @@ const styles = StyleSheet.create({
     minWidth: 20,
     textAlign: 'center',
   },
-
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline', // Keeps the symbol and number aligned at the bottom
+  },
+  currencySymbol: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#374151', // Gray-700
+    marginRight: 2,
+  },
+  priceText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827', // Gray-900
+    letterSpacing: -0.5,
+  },
   sectionTitle: {
     fontSize: 12,
     fontWeight: '800',
@@ -280,12 +321,20 @@ const styles = StyleSheet.create({
     borderTopColor: '#F1F5F9',
   },
   confirmBtn: {
-    backgroundColor: swiggyColors.primary,
+    flex: 0.8, // 80% width
+    height: 52,
+    backgroundColor: color.dark, // Success Green
     borderRadius: 12,
-    height: 50,
     justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 20,
-    elevation: 4,
+    // Shadow/Elevation
+    shadowColor: color.dark,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
+    minWidth: 200,
   },
   btnContent: {
     flexDirection: 'row',
@@ -300,7 +349,7 @@ const styles = StyleSheet.create({
     lineHeight: 28,
   },
   btnSub: {
-    color: swiggyColors.primary,
+    color: color.dark,
     fontSize: 12,
     fontWeight: '700',
     opacity: 0.9,

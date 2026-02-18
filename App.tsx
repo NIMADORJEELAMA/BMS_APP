@@ -33,7 +33,7 @@
 // export default App;
 
 import React from 'react';
-import {StatusBar} from 'react-native';
+import {StatusBar, View} from 'react-native';
 import {Provider} from 'react-redux';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {NavigationContainer} from '@react-navigation/native';
@@ -42,6 +42,9 @@ import store from './src/redux/store';
 import Navigation from './src/routes/Navigation';
 // 1. Import the navigation reference
 import {navigationRef} from './src/utils/navigationRef';
+import Toast from 'react-native-toast-message';
+
+import toastConfig from './toastConfig';
 
 const MainApp = () => {
   return (
@@ -63,6 +66,7 @@ const App = () => {
   return (
     <Provider store={store}>
       <MainApp />
+      <Toast config={toastConfig} />
     </Provider>
   );
 };

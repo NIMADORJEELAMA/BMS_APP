@@ -13,6 +13,8 @@ import {orderService} from '../../services/orderService';
 import CloseBtn from '../../assets/Icons/closeIcon.svg';
 import swiggyColors from '../../assets/Color/swiggyColor';
 import color from '../../assets/Color/color';
+import {socket} from '../../services/socketService';
+import Toast from 'react-native-toast-message';
 interface ViewOrderModalProps {
   visible: boolean;
   onClose: () => void;
@@ -29,6 +31,7 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
     try {
       setLoading(true);
       const data = await orderService.getActiveOrders(table.id);
+      console.log('data', data);
       setOrder(data);
     } catch (err) {
       console.error(err);
@@ -40,12 +43,53 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
   useEffect(() => {
     if (visible) fetchActiveOrder();
   }, [visible]);
+  useEffect(() => {
+    if (!socket.connected) socket.connect();
+
+    const handleUpdate = (data: any) => {
+      // Only refresh if the update belongs to THIS table
+      // The backend now sends the whole table object or tableId
+      if (data.id === table.id || data.tableId === table.id) {
+        console.log('Refreshing order for table:', table.id);
+        fetchActiveOrder();
+      }
+    };
+
+    socket.on('newOrder', handleUpdate);
+    socket.on('itemStatusUpdated', handleUpdate);
+
+    socket.on('itemStatusUpdated', data => {
+      console.log('data>>>>>', data);
+      // Check if the item belongs to this table's order
+      if (data.tableId === table.id || data.orderId === order?.id) {
+        // fetchActiveOrder();
+        if (data.status === 'READY') {
+          Toast.show({
+            type: 'success',
+            text1: '🍳 Kitchen Update',
+            text2: `Food is ready for ${table.name}`,
+            position: 'top',
+            topOffset: 50,
+            props: {
+              backgroundColor: swiggyColors.veg,
+            },
+          });
+        }
+      }
+    });
+
+    return () => {
+      socket.off('tableUpdated', handleUpdate);
+      socket.off('newOrder', handleUpdate);
+      socket.off('itemStatusUpdated');
+    };
+  }, [table.id, order?.id]); // Re-bind when IDs change
 
   const handleServeItem = async (itemId: string) => {
     try {
       await orderService.serveItem(itemId);
       // Success feedback
-      fetchActiveOrder(); // Refresh modal list
+      // fetchActiveOrder(); // Refresh modal list
     } catch (err) {
       console.log('err', err);
     }
@@ -167,7 +211,7 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
             </ScrollView>
           )}
 
-          {order && (
+          {/* {order && (
             <Div style={styles.footer}>
               <Div>
                 <Text style={styles.footerLabel}>Grand Total</Text>
@@ -175,7 +219,7 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
               </Div>
               <Text style={styles.totalAmount}>₹{order.totalAmount || 0}</Text>
             </Div>
-          )}
+          )} */}
         </Div>
       </Div>
     </Modal>
@@ -188,16 +232,17 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: color.white,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     maxHeight: '85%',
-    paddingBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: -10},
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 20,
+    bottom: 0,
+    // paddingBottom: 10,
+    // shadowColor: '#000',
+    // shadowOffset: {width: 0, height: -10},
+    // shadowOpacity: 0.1,
+    // shadowRadius: 20,
+    // elevation: 20,
   },
   dragHandle: {
     width: 40,
@@ -281,15 +326,17 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: color.dark,
-    borderRadius: 20,
+    marginBottom: 8,
+    backgroundColor: swiggyColors.veg,
+    borderRadius: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: color.dark,
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 8,
+    // shadowColor: color.dark,
+    // shadowOffset: {width: 0, height: 4},
+    // shadowOpacity: 0.3,
+    // shadowRadius: 1,
+    // elevation: 4,
   },
   footerLabel: {color: '#FFF', fontSize: 14, fontWeight: '700'},
   footerSub: {color: '#f3f3f3', fontSize: 10, marginTop: 2},
