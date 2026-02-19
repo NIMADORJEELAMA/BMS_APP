@@ -40,7 +40,7 @@ const AnimatedTabButton = (props: any) => {
           top: -8,
           height: 10,
           borderRadius: 50,
-          backgroundColor: '#fa2c37',
+          backgroundColor: '#000',
           width: borderWidth.interpolate({
             inputRange: [0, 100],
             outputRange: ['0%', '100%'],
@@ -49,7 +49,7 @@ const AnimatedTabButton = (props: any) => {
       />
       <View style={{alignItems: 'center'}}>
         {props.icon}
-        <Text style={{color: isSelected ? '#fa2c37' : 'gray', fontSize: 12}}>
+        <Text style={{color: isSelected ? '#000' : 'gray', fontSize: 12}}>
           {props.label}
         </Text>
       </View>

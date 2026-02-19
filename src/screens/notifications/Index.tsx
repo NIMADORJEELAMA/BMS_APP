@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text} from 'react-native';
 import ProfileGrid from '../../components/Swipe/ProfileGrid';
-import {DatingScreen} from '../homeScreen/DatingScreen';
+import {DatingScreen} from '../TableSelectionScreen/DatingScreen';
 
 const Notification = profile => {
   const yourStoriesArray = [
