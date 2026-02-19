@@ -1,4 +1,4 @@
-package com.xyz
+package com.HillTopResort
 
 import android.app.Application
 import com.facebook.react.PackageList

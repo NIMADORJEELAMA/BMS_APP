@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "977771010246",
+    "project_id": "hilltopresort-a96c8",
+    "storage_bucket": "hilltopresort-a96c8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:977771010246:android:1aa0c8d7ae6a82dbaf9fc7",
+        "android_client_info": {
+          "package_name": "com.HillTopResort"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdQyThVwh-DInX1EsSMA_0PRBYuQahUhI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

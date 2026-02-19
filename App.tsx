@@ -37,7 +37,7 @@ import {StatusBar, View} from 'react-native';
 import {Provider} from 'react-redux';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {NavigationContainer} from '@react-navigation/native';
-
+import {getApps, initializeApp} from '@react-native-firebase/app';
 import store from './src/redux/store';
 import Navigation from './src/routes/Navigation';
 // 1. Import the navigation reference
@@ -47,7 +47,11 @@ import Toast from 'react-native-toast-message';
 import toastConfig from './toastConfig';
 import {useNotifications} from './src/hooks/useNotifications';
 
+if (!getApps().length) {
+  initializeApp({} as any); // ✅ Satisfies TS, uses native config
+}
 const MainApp = () => {
+  useNotifications();
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       {/* 2. Attach the ref to the NavigationContainer */}
@@ -64,7 +68,6 @@ const MainApp = () => {
 };
 
 const App = () => {
-  // useNotifications();
   return (
     <Provider store={store}>
       <MainApp />

@@ -1,44 +1,68 @@
 import {useEffect} from 'react';
-import messaging from '@react-native-firebase/messaging';
+import {Platform, PermissionsAndroid} from 'react-native';
+import {getApp} from '@react-native-firebase/app';
+import {
+  getMessaging,
+  getToken,
+  requestPermission,
+  onMessage,
+  onNotificationOpenedApp,
+} from '@react-native-firebase/messaging';
 import Toast from 'react-native-toast-message';
-import {Alert, Platform} from 'react-native';
+import {navigationRef} from '../utils/navigationRef';
 
 export const useNotifications = () => {
   useEffect(() => {
-    // 1. Request Permission (Required for iOS)
-    const requestPermission = async () => {
-      const authStatus = await messaging().requestPermission();
-      const enabled =
-        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+    // 1. Initialize messaging using the new modular pattern
+    const app = getApp();
+    const messaging = getMessaging(app);
 
-      if (enabled) {
-        console.log('Authorization status:', authStatus);
-        const token = await messaging().getToken();
-        console.log('FCM Device Token:', token);
-        // TODO: Send this token to your backend!
+    const setupNotifications = async () => {
+      try {
+        // Handle Android 13+ Notification Permission
+        if (Platform.OS === 'android' && Platform.Version >= 33) {
+          await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+          );
+        }
+
+        // 2. Request Permission (Modular style)
+        const authStatus = await requestPermission(messaging);
+        const enabled =
+          authStatus === 1 || // Authorized
+          authStatus === 2; // Provisional
+
+        if (enabled) {
+          // 3. Get Token (Modular style)
+          const token = await getToken(messaging);
+          console.log('✅ FCM Device Token:', token);
+          // TODO: api.patch('/user/fcm-token', { token });
+        }
+      } catch (error) {
+        console.error('Push Notification Setup Error:', error);
       }
     };
 
-    requestPermission();
+    setupNotifications();
 
-    // 2. Handle Foreground Messages (App is open)
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
+    // 4. Listen for messages in Foreground
+    const unsubscribe = onMessage(messaging, async remoteMessage => {
+      console.log('Received in foreground:', remoteMessage);
       Toast.show({
         type: 'success',
         text1: remoteMessage.notification?.title || 'Order Update',
-        text2: remoteMessage.notification?.body || 'Check the kitchen queue!',
+        text2: remoteMessage.notification?.body || 'New update from kitchen!',
         position: 'top',
-        visibilityTime: 6000,
+        topOffset: 60,
       });
     });
 
-    // 3. Handle Background/Quit State Clicks
-    messaging().onNotificationOpenedApp(remoteMessage => {
-      console.log(
-        'Notification caused app to open from background:',
-        remoteMessage,
-      );
+    onNotificationOpenedApp(messaging, remoteMessage => {
+      if (remoteMessage.data?.orderId) {
+        // Navigate to the order details or highlight the table
+        console.log('first');
+        // navigationRef.navigate('OrderDetails', { orderId: remoteMessage.data.orderId });
+      }
     });
 
     return unsubscribe;
