@@ -82,15 +82,15 @@ const TableSelectionScreen = ({navigation}: any) => {
     socket.on('newOrder', handleUpdate);
     socket.on('itemStatusUpdated', data => {
       console.log('data', data);
-      if (data.status === 'READY') {
-        loadInitialData();
-        Toast.show({
-          type: 'info',
-          text1: ' Kitchen Update',
-          text2: `Order for Table ${data.tableNumber} is ready!`,
-          visibilityTime: 4000,
-        });
-      }
+      // if (data.status === 'READY') {
+      //   loadInitialData();
+      //   Toast.show({
+      //     type: 'info',
+      //     text1: ' Kitchen Update',
+      //     text2: `Order for Table ${data.tableNumber} is ready!`,
+      //     visibilityTime: 4000,
+      //   });
+      // }
     });
 
     return () => {

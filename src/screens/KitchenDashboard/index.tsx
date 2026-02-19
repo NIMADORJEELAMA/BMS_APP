@@ -121,11 +121,11 @@ const KitchenDashboard = () => {
 
       if (updatePromises.length === 0) return;
       await Promise.all(updatePromises);
-      Toast.show({
-        type: 'success',
-        text1: `Table ${order.tableNumber} Ready!`,
-        position: 'top',
-      });
+      // Toast.show({
+      //   type: 'success',
+      //   text1: `Table ${order.tableNumber} Ready!`,
+      //   position: 'top',
+      // });
       fetchKitchenQueue();
     } catch (err) {
       Toast.show({type: 'error', text1: 'Failed to mark ready'});
