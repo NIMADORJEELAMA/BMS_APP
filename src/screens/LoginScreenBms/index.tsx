@@ -21,7 +21,7 @@ import EyeOpen from '../../assets/Icons/eye_open.svg';
 import EyeClosed from '../../assets/Icons/eye_closed.svg';
 
 const LoginScreenBms = () => {
-  const [email, setEmail] = useState('Nima@test.com');
+  const [email, setEmail] = useState('Santosh@gmail.com');
   const [password, setPassword] = useState('123123');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);

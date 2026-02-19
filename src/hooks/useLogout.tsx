@@ -3,6 +3,7 @@ import {logout} from '../redux/slices/authSlice';
 import {clearCart} from '../redux/slices/cartSlice';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // If using storage
+import {userService} from '../services/userService';
 
 const useLogout = () => {
   const dispatch = useDispatch();
@@ -12,7 +13,7 @@ const useLogout = () => {
     try {
       // 1. Clear Token from Redux
       dispatch(logout());
-
+      await userService.updateFcmToken('');
       // 2. Clear Cart from Redux (Prevents order leaks)
       dispatch(clearCart());
 

@@ -34,7 +34,7 @@
 
 import React from 'react';
 import {StatusBar, View} from 'react-native';
-import {Provider} from 'react-redux';
+import {Provider, useSelector} from 'react-redux';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {NavigationContainer} from '@react-navigation/native';
 import {getApps, initializeApp} from '@react-native-firebase/app';
@@ -51,7 +51,10 @@ if (!getApps().length) {
   initializeApp({} as any); // ✅ Satisfies TS, uses native config
 }
 const MainApp = () => {
-  useNotifications();
+  const isAuthenticated = useSelector(
+    (state: any) => state.auth.isAuthenticated,
+  );
+  useNotifications(isAuthenticated);
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       {/* 2. Attach the ref to the NavigationContainer */}
