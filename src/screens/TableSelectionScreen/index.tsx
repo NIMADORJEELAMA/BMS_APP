@@ -13,6 +13,7 @@ import {
   Text,
   ScrollView,
 } from 'react-native';
+
 import {Div} from '../../components/common/UI';
 import MainLayout from '../MainLayout';
 import {tableService} from '../../services/tableService';
@@ -23,6 +24,7 @@ import SearchBar from '../../components/Searchbar';
 import swiggyColors from '../../assets/Color/swiggyColor';
 import {socket} from '../../services/socketService';
 import Toast from 'react-native-toast-message';
+
 const {width} = Dimensions.get('window');
 const ITEM_WIDTH = (width - 40) / 2;
 

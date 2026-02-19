@@ -211,7 +211,7 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
             </ScrollView>
           )}
 
-          {/* {order && (
+          {order && (
             <Div style={styles.footer}>
               <Div>
                 <Text style={styles.footerLabel}>Grand Total</Text>
@@ -219,7 +219,7 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
               </Div>
               <Text style={styles.totalAmount}>₹{order.totalAmount || 0}</Text>
             </Div>
-          )} */}
+          )}
         </Div>
       </Div>
     </Modal>
@@ -327,20 +327,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     marginBottom: 8,
-    backgroundColor: swiggyColors.veg,
+    backgroundColor: '#ffffff',
     borderRadius: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    // shadowColor: color.dark,
-    // shadowOffset: {width: 0, height: 4},
-    // shadowOpacity: 0.3,
-    // shadowRadius: 1,
-    // elevation: 4,
+    shadowColor: color.dark,
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+    elevation: 2,
   },
-  footerLabel: {color: '#FFF', fontSize: 14, fontWeight: '700'},
-  footerSub: {color: '#f3f3f3', fontSize: 10, marginTop: 2},
-  totalAmount: {fontSize: 28, fontWeight: '900', color: '#FFF'},
+  footerLabel: {color: color.dark, fontSize: 14, fontWeight: '700'},
+  footerSub: {color: swiggyColors.textSecondary, fontSize: 10, marginTop: 2},
+  totalAmount: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: swiggyColors.textPrimary,
+  },
   loaderContainer: {padding: 60, alignItems: 'center'},
   loadingText: {marginTop: 10, color: '#64748B', fontSize: 12},
   emptyContainer: {padding: 60, alignItems: 'center'},

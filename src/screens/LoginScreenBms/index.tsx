@@ -13,9 +13,9 @@ import {
 } from 'react-native';
 import {Text, Div} from '../../components/common/UI';
 import {authService} from '../../services/authService';
-import {setToken} from '../../redux/slices/authSlice';
+import {setToken, setUser} from '../../redux/slices/authSlice';
 import {useDispatch} from 'react-redux';
-import {saveToken} from '../../utils/storage';
+import {saveToken, saveUser} from '../../utils/storage';
 import EyeOpen from '../../assets/Icons/eye_open.svg';
 
 import EyeClosed from '../../assets/Icons/eye_closed.svg';
@@ -38,10 +38,13 @@ const LoginScreenBms = () => {
     try {
       const response = await authService.login({email, password});
       const token = response?.access_token;
-
+      const userData = response?.user;
+      console.log('response >>', response);
       if (token) {
         await saveToken(token);
+        await saveUser(userData);
         dispatch(setToken(token));
+        dispatch(setUser(userData));
       } else {
         Alert.alert('Login Error', "We couldn't verify your session.");
       }

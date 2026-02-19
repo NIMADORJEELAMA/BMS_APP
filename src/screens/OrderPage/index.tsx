@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo, useCallback} from 'react';
+import React, {useState, useEffect, useMemo, useCallback, useRef} from 'react';
 import {
   StyleSheet,
   TouchableOpacity,
@@ -10,6 +10,7 @@ import {
   ScrollView,
   ActivityIndicator,
   RefreshControl,
+  Animated,
 } from 'react-native';
 import {Div} from '../../components/common/UI';
 import MainLayout from '../../screens/MainLayout';
@@ -33,7 +34,7 @@ const itemWidth = (screenWidth - 48) / 3; // Precise spacing for 3-column grid
 const OrderPage = ({route}: any) => {
   const navigation = useNavigation<any>();
   const {table} = route.params;
-  console.log('table', table);
+
   const tableId = table.id;
 
   // State
@@ -55,6 +56,16 @@ const OrderPage = ({route}: any) => {
   );
 
   const itemList = Object.values(cartItems);
+
+  const vegAnim = useRef(new Animated.Value(isVegOnly ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.timing(vegAnim, {
+      toValue: isVegOnly ? 1 : 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  }, [isVegOnly]);
   // Fetch Menu on Mount
   useEffect(() => {
     const fetchMenu = async () => {
@@ -113,13 +124,18 @@ const OrderPage = ({route}: any) => {
       });
       dispatch(clearCart());
       // navigation.goBack();
-    } catch (err) {
+    } catch (err: any) {
+      // Extract the most relevant message
+      const errorMessage =
+        err.response?.data?.message || err.message || 'Something went wrong';
+
       Toast.show({
         type: 'error',
         text1: 'Order Failed',
-        text2: 'Could not connect to the kitchen. Please try again.',
+        text2: errorMessage, // Now shows a readable string
         position: 'top',
         topOffset: 50,
+        visibilityTime: 4000,
       });
     } finally {
       setIsOrdering(false);
@@ -159,7 +175,6 @@ const OrderPage = ({route}: any) => {
       activeOpacity={0.8}
       onPress={() => navigation.navigate('CartScreen', {table})}
       style={styles.cartHeaderBtn}>
-      {/* Replace emoji with SVG if possible */}
       <Text style={{fontSize: 22}}>
         <Cart height={24} fill={color.dark} />
       </Text>
@@ -275,31 +290,52 @@ const OrderPage = ({route}: any) => {
 
             <TouchableOpacity
               activeOpacity={0.7}
-              style={[styles.vegToggle, isVegOnly && styles.vegToggleActive]}
+              style={[
+                styles.vegToggle,
+                {borderColor: isVegOnly ? swiggyColors.veg : '#E2E8F0'},
+              ]}
               onPress={() => setIsVegOnly(!isVegOnly)}>
-              <View
-                style={[
-                  styles.vegBox,
-                  {borderColor: isVegOnly ? swiggyColors.veg : '#CBD5E1'},
-                ]}>
-                <View
+              <View style={styles.topRow}>
+                {/* <View
                   style={[
-                    styles.vegInnerDot,
+                    styles.vegBox,
+                    {borderColor: isVegOnly ? swiggyColors.veg : '#CBD5E1'},
+                  ]}>
+                  <View
+                    style={[
+                      styles.vegInnerDot,
+                      {
+                        backgroundColor: isVegOnly
+                          ? swiggyColors.veg
+                          : 'transparent',
+                      },
+                    ]}
+                  />
+                </View> */}
+                <Text
+                  style={[
+                    styles.vegToggleLabel,
+                    isVegOnly && {color: swiggyColors.veg},
+                  ]}>
+                  VEG
+                </Text>
+              </View>
+
+              {/* Small Slider Below */}
+              <View style={styles.switchTrack}>
+                <Animated.View
+                  style={[
+                    styles.switchThumb,
                     {
-                      backgroundColor: isVegOnly
-                        ? swiggyColors.veg
-                        : 'transparent',
+                      marginLeft: vegAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [2, 14], // Distance thumb travels
+                      }),
+                      backgroundColor: isVegOnly ? swiggyColors.veg : '#94A3B8',
                     },
                   ]}
                 />
               </View>
-              <Text
-                style={[
-                  styles.vegToggleLabel,
-                  isVegOnly && {color: swiggyColors.veg},
-                ]}>
-                VEG
-              </Text>
             </TouchableOpacity>
           </View>
 
@@ -514,15 +550,7 @@ const styles = StyleSheet.create({
     color: '#FC8019',
   },
   // Veg Icon Styling
-  vegBox: {
-    width: 10,
-    height: 10,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 6,
-    borderRadius: 2,
-  },
+
   vegDot: {
     width: 6,
     height: 6,
@@ -530,29 +558,53 @@ const styles = StyleSheet.create({
   },
 
   // Modern Veg Toggle
-  vegToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    paddingHorizontal: 6,
-    height: 48,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
+
   vegToggleActive: {
     borderColor: '#27ae60',
     backgroundColor: '#F0FDF4',
   },
 
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4, // Space between text and slider
+  },
+  switchTrack: {
+    width: 28,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#E2E8F0', // Light gray background
+    justifyContent: 'center',
+  },
+  switchThumb: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  vegBox: {
+    width: 14,
+    height: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 4,
+  },
+  vegToggle: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 5,
+  },
   vegInnerDot: {
-    width: 5,
-    height: 5,
+    width: 6,
+    height: 6,
     borderRadius: 3,
   },
   vegToggleLabel: {
-    fontSize: 11,
-    fontWeight: '800',
+    fontSize: 10,
+    fontWeight: 'bold',
     color: '#64748B',
   },
   // Action Row

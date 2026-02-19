@@ -5,6 +5,7 @@ const authSlice = createSlice({
   name: 'auth',
   initialState: {
     token: null,
+    user: null,
     isAuthenticated: false,
     isLoading: true, // App starts by checking storage
   },
@@ -14,6 +15,10 @@ const authSlice = createSlice({
       // If token exists, user is authenticated
       state.isAuthenticated = !!action.payload;
       state.isLoading = false; // Stop showing splash screen
+    },
+    setUser: (state, action) => {
+      // Add this
+      state.user = action.payload;
     },
     logout: state => {
       state.token = null;
@@ -26,5 +31,5 @@ const authSlice = createSlice({
   },
 });
 
-export const {setToken, logout, setLoading} = authSlice.actions;
+export const {setToken, logout, setUser, setLoading} = authSlice.actions;
 export default authSlice.reducer;
