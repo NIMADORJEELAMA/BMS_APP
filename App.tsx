@@ -45,6 +45,7 @@ import {navigationRef} from './src/utils/navigationRef';
 import Toast from 'react-native-toast-message';
 
 import toastConfig from './toastConfig';
+import {useNotifications} from './src/hooks/useNotifications';
 
 const MainApp = () => {
   return (
@@ -63,6 +64,7 @@ const MainApp = () => {
 };
 
 const App = () => {
+  // useNotifications();
   return (
     <Provider store={store}>
       <MainApp />
