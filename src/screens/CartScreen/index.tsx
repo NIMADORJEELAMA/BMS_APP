@@ -7,8 +7,9 @@ import {
   Alert,
   View,
   TextInput,
+  Text,
 } from 'react-native';
-import {Text} from '../../components/common/UI';
+
 import MainLayout from '../../screens/MainLayout';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../../redux/store';
@@ -48,6 +49,8 @@ const CartScreen = ({route, navigation}: any) => {
     try {
       const payload = {
         tableId: tableId,
+        isSpicy: isSpicy, // Global field
+        note: orderNote,
         items: itemList.map(item => ({
           menuItemId: item.id,
           quantity: item.quantity,
