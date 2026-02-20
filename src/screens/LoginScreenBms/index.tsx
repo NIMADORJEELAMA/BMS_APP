@@ -19,6 +19,7 @@ import {saveToken, saveUser} from '../../utils/storage';
 import EyeOpen from '../../assets/Icons/eye_open.svg';
 
 import EyeClosed from '../../assets/Icons/eye_closed.svg';
+import {useNotifications} from '../../hooks/useNotifications';
 
 const LoginScreenBms = () => {
   const [email, setEmail] = useState('Santosh@gmail.com');
@@ -27,7 +28,7 @@ const LoginScreenBms = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const dispatch = useDispatch();
-
+  const {registerDevice} = useNotifications(false);
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Missing Info', 'Please fill in both email and password.');
@@ -45,6 +46,10 @@ const LoginScreenBms = () => {
         await saveUser(userData);
         dispatch(setToken(token));
         dispatch(setUser(userData));
+
+        setTimeout(async () => {
+          await registerDevice();
+        }, 500);
       } else {
         Alert.alert('Login Error', "We couldn't verify your session.");
       }

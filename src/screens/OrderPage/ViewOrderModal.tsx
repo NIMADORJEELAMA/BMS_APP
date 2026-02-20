@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {
   Modal,
   ScrollView,
@@ -15,21 +15,46 @@ import swiggyColors from '../../assets/Color/swiggyColor';
 import color from '../../assets/Color/color';
 import {socket} from '../../services/socketService';
 import Toast from 'react-native-toast-message';
+
 interface ViewOrderModalProps {
   visible: boolean;
   onClose: () => void;
   table: {
     id: string;
     name: string;
+    readyItemId: string;
   };
 }
 const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
+  console.log('visible, onClose, table', visible, onClose, table);
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  const [servingId, setServingId] = useState<string | null>(null);
+  const scrollRef = useRef<ScrollView>(null);
+  const itemLayouts = useRef<{[key: string]: number}>({});
+  const [highlightedItemId, setHighlightedItemId] = useState<string | null>(
+    null,
+  );
+  const [activeHighlightId, setActiveHighlightId] = useState<string | null>(
+    null,
+  );
+  const handleItemLayout = (itemId: string, y: number) => {
+    itemLayouts.current[itemId] = y;
+
+    // Scroll ONLY when this is the highlighted item
+    if (itemId === highlightedItemId && scrollRef.current) {
+      requestAnimationFrame(() => {
+        scrollRef.current?.scrollTo({
+          y: y - 20,
+          animated: true,
+        });
+      });
+    }
+  };
   const fetchActiveOrder = async () => {
     try {
-      setLoading(true);
+      // setLoading(true);
       const data = await orderService.getActiveOrders(table.id);
       console.log('data', data);
       setOrder(data);
@@ -41,8 +66,22 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
   };
 
   useEffect(() => {
-    if (visible) fetchActiveOrder();
-  }, [visible]);
+    if (visible && table?.readyItemId) {
+      setActiveHighlightId(table.readyItemId);
+
+      const timer = setTimeout(() => {
+        setActiveHighlightId(null);
+      }, 6000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [visible, table?.readyItemId]);
+
+  useEffect(() => {
+    if (visible && table?.id) {
+      fetchActiveOrder();
+    }
+  }, [visible, table?.id]);
   useEffect(() => {
     if (!socket.connected) socket.connect();
 
@@ -87,13 +126,30 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
 
   const handleServeItem = async (itemId: string) => {
     try {
+      setServingId(itemId);
       await orderService.serveItem(itemId);
-      // Success feedback
-      // fetchActiveOrder(); // Refresh modal list
+
+      setOrder((prevOrder: any) => ({
+        ...prevOrder,
+        items: prevOrder.items.map((item: any) =>
+          item.id === itemId ? {...item, status: 'SERVED'} : item,
+        ),
+      }));
     } catch (err) {
       console.log('err', err);
+    } finally {
+      setServingId(null);
     }
   };
+  // const handleServeItem = async (itemId: string) => {
+  //   try {
+  //     await orderService.serveItem(itemId);
+  //     // Success feedback
+  //     // fetchActiveOrder(); // Refresh modal list
+  //   } catch (err) {
+  //     console.log('err', err);
+  //   }
+  // };
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'READY':
@@ -165,14 +221,25 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
             </Div>
           ) : (
             <ScrollView
+              ref={scrollRef}
               style={styles.scrollArea}
               showsVerticalScrollIndicator={false}>
               {order.items?.map((item: any) => {
                 const config = getStatusConfig(item.status);
                 const isReady = item.status === 'READY';
+                const isHighlighted = item.id === activeHighlightId;
 
                 return (
-                  <Div key={item.id} style={styles.orderItem}>
+                  <Div
+                    key={item.id}
+                    // 2. Capture the Y position of this specific item
+                    onLayout={(e: any) => {
+                      handleItemLayout(item.id, e.nativeEvent.layout.y);
+                    }}
+                    style={[
+                      styles.orderItem,
+                      isHighlighted && styles.highlightedItem,
+                    ]}>
                     <Div style={styles.itemMain}>
                       <Div style={styles.qtyBadge}>
                         <Text style={styles.qtyText}>{item.quantity}</Text>
@@ -196,15 +263,30 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
                         </Div>
                       </Div>
                     </Div>
-
                     {isReady && (
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        style={[
+                          styles.serveBtn,
+                          servingId === item.id && styles.serveBtnDisabled,
+                        ]}
+                        onPress={() => handleServeItem(item.id)}
+                        disabled={servingId !== null}>
+                        {servingId === item.id ? (
+                          <ActivityIndicator size="small" color="#FFF" />
+                        ) : (
+                          <Text style={styles.serveBtnText}>Serve</Text>
+                        )}
+                      </TouchableOpacity>
+                    )}
+                    {/* {isReady && (
                       <TouchableOpacity
                         activeOpacity={0.8}
                         style={styles.serveBtn}
                         onPress={() => handleServeItem(item.id)}>
                         <Text style={styles.serveBtnText}>Serve</Text>
                       </TouchableOpacity>
-                    )}
+                    )} */}
                   </Div>
                 );
               })}
@@ -285,6 +367,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F1F5F9',
   },
+  highlightedItem: {
+    backgroundColor: '#FEF3C7',
+    borderLeftWidth: 4,
+    borderLeftColor: '#FC8019',
+  },
   itemMain: {flexDirection: 'row', alignItems: 'center', flex: 1},
   qtyBadge: {
     backgroundColor: '#F8FAFC',
@@ -315,10 +402,16 @@ const styles = StyleSheet.create({
   dot: {width: 6, height: 6, borderRadius: 3, marginRight: 6},
   statusLabel: {fontSize: 10, fontWeight: '800'},
   serveBtn: {
-    backgroundColor: color.dark, // Dark button looks more "Pro"
+    backgroundColor: color.dark,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 10,
+    minWidth: 70, // Added to prevent button shrinking when loader appears
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  serveBtnDisabled: {
+    opacity: 0.7,
   },
   serveBtnText: {color: '#FFF', fontWeight: '700', fontSize: 12},
   footer: {

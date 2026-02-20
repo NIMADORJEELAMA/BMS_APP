@@ -35,8 +35,8 @@ import PhoneNumber from '../screens/Settings/PhoneNumber';
 import Email from '../screens/Settings/Email';
 import Location from '../screens/Settings/Location';
 import {useDispatch, useSelector} from 'react-redux';
-import {getToken} from '../utils/storage';
-import {setToken} from '../redux/slices/authSlice';
+import {getToken, getUser} from '../utils/storage';
+import {setToken, setUser} from '../redux/slices/authSlice';
 import LoginScreenBms from '../screens/LoginScreenBms';
 import OrderPage from '../screens/OrderPage';
 import CartScreen from '../screens/CartScreen';
@@ -250,22 +250,33 @@ const Navigation = () => {
   // 1. Pull everything from Redux Auth Slice
   const {isAuthenticated, isLoading} = useSelector((state: any) => state.auth);
 
-  // 2. Only ONE useEffect to initialize the app
   useEffect(() => {
     const initAuth = async () => {
       try {
+        // 1. Fetch both from Storage
         const storedToken = await getToken();
-        // This triggers setToken which sets isLoading to false in your slice
-        dispatch(setToken(storedToken));
+        const storedUser = await getUser(); // Call your new utility
+
+        if (storedToken && storedUser) {
+          // 2. Restore to Redux
+          dispatch(setToken(storedToken));
+          dispatch(setUser(storedUser));
+        } else {
+          // If either is missing, ensure state is clean
+          dispatch(setToken(null));
+          dispatch(setUser(null));
+        }
       } catch (e) {
-        console.error('Failed to load token', e);
+        console.error('Failed to load auth data', e);
         dispatch(setToken(null));
+      } finally {
+        // Ensure you have a 'setLoading' action or that setToken handles it
+        // dispatch(setLoading(false));
       }
     };
     initAuth();
   }, [dispatch]);
 
-  // 3. Show Splash while checking AsyncStorage
   if (isLoading) {
     return <SplashScreen />;
   }

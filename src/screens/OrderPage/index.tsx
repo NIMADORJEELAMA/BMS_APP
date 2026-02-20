@@ -33,7 +33,8 @@ const itemWidth = (screenWidth - 48) / 3; // Precise spacing for 3-column grid
 
 const OrderPage = ({route}: any) => {
   const navigation = useNavigation<any>();
-  const {table} = route.params;
+  const {table, id} = route.params;
+  console.log('table orderpage', table);
 
   const tableId = table.id;
 
@@ -67,6 +68,14 @@ const OrderPage = ({route}: any) => {
     }).start();
   }, [isVegOnly]);
   // Fetch Menu on Mount
+
+  useEffect(() => {
+    // If 'id' exists, it means we came from a notification
+    if (id) {
+      console.log('🚀 Opening Modal automatically for Order:', id);
+      setModalVisible(true);
+    }
+  }, [id]);
   useEffect(() => {
     const fetchMenu = async () => {
       try {

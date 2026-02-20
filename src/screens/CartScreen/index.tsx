@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Alert,
   View,
+  TextInput,
 } from 'react-native';
 import {Text} from '../../components/common/UI';
 import MainLayout from '../../screens/MainLayout';
@@ -25,6 +26,8 @@ const CartScreen = ({route, navigation}: any) => {
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const [isOrdering, setIsOrdering] = useState(false);
   console.log('cartItems', cartItems);
+  const [orderNote, setOrderNote] = useState('');
+  const [isSpicy, setIsSpicy] = useState(false);
 
   const itemList = Object.values(cartItems);
   const totalAmount = itemList.reduce(
@@ -173,7 +176,41 @@ const CartScreen = ({route, navigation}: any) => {
               </View>
             </View>
           )} */}
+
+          <View style={styles.sectionCard}>
+            <View style={styles.preferenceRow}>
+              <View>
+                <Text style={styles.prefLabel}>Mark all as Spicy?</Text>
+                <Text style={styles.prefSub}>
+                  Applies to all eligible items
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setIsSpicy(!isSpicy)}
+                style={[styles.spicyToggle, isSpicy && styles.spicyActive]}>
+                <Text
+                  style={[styles.spicyToggleText, isSpicy && {color: '#fff'}]}>
+                  🌶️ {isSpicy ? 'YES' : 'NO'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.noteContainer}>
+              <Text style={styles.noteLabel}>Cooking Instructions / Notes</Text>
+              <TextInput
+                style={styles.orderNoteInput}
+                placeholder="E.g. Table prefers less salt, bring water first..."
+                placeholderTextColor="#94A3B8"
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+                value={orderNote}
+                onChangeText={setOrderNote}
+              />
+            </View>
+          </View>
         </ScrollView>
+        {/* Global Order Customizations */}
 
         <View style={styles.footer}>
           <View
@@ -216,7 +253,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     borderRadius: 16,
-    paddingVertical: 2,
+    paddingVertical: 6,
     paddingHorizontal: 12,
     shadowColor: swiggyColors.textPrimary,
     shadowOpacity: 0.05,
@@ -309,7 +346,58 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: swiggyColors.textPrimary,
   },
-
+  preferenceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+    marginBottom: 16,
+  },
+  prefLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: swiggyColors.textPrimary,
+  },
+  prefSub: {
+    fontSize: 11,
+    color: swiggyColors.textSecondary,
+  },
+  spicyToggle: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#D4D5D9',
+    backgroundColor: '#F8FAFC',
+  },
+  spicyActive: {
+    backgroundColor: '#EF4444',
+    borderColor: '#EF4444',
+  },
+  spicyToggleText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  noteContainer: {
+    marginTop: 4,
+  },
+  noteLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#64748B',
+    marginBottom: 8,
+  },
+  orderNoteInput: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 14,
+    color: '#1E293B',
+    minHeight: 80,
+  },
   footer: {
     position: 'absolute',
     bottom: 0,
