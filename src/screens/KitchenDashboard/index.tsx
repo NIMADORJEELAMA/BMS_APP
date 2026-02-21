@@ -1,19 +1,18 @@
 import React, {useEffect, useState, useMemo} from 'react';
-import {
-  StyleSheet,
-  View,
-  FlatList,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-} from 'react-native';
+import {StyleSheet, View, FlatList, TouchableOpacity, Text} from 'react-native';
 import MainLayout from '../MainLayout';
-import {Text, Div} from '../../components/common/UI';
+
 import {io} from 'socket.io-client';
 import api from '../../services/axiosInstance';
 import Toast from 'react-native-toast-message';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {socket} from '../../services/socketService';
+import RoomIcon from '../../assets/Icons/housesvg.svg';
+import ChairIcon from '../../assets/Icons/chair.svg';
+import TickIcon from '../../assets/Icons/tick-svgrepo-com.svg';
+
+import swiggyColors from '../../assets/Color/swiggyColor';
+
 // Use your actual IP, not localhost for physical devices
 
 const KitchenDashboard = () => {
@@ -76,6 +75,17 @@ const KitchenDashboard = () => {
   const handleMarkItemReady = async (itemId: string) => {
     try {
       await api.patch(`/orders/item/${itemId}/status`, {status: 'READY'});
+      Toast.show({
+        type: 'success',
+        text1: `Waiter is notified`,
+        // text2: 'The kitchen has received your order.',
+        position: 'top',
+        topOffset: 50,
+        // Pass custom data here
+        props: {
+          backgroundColor: swiggyColors.textPrimary,
+        },
+      });
       fetchKitchenQueue();
     } catch (err) {
       Toast.show({type: 'error', text1: 'Failed to update status'});
@@ -97,9 +107,17 @@ const KitchenDashboard = () => {
       );
 
       console.log('Printing New KOT for:', itemsToPrint);
+
       Toast.show({
         type: 'success',
         text1: `KOT Printed for ${itemsToPrint.length} items.`,
+        // text2: 'The kitchen has received your order.',
+        position: 'top',
+        topOffset: 50,
+        // Pass custom data here
+        props: {
+          backgroundColor: swiggyColors.veg,
+        },
       });
       fetchKitchenQueue();
     } catch (err) {
@@ -157,11 +175,13 @@ const KitchenDashboard = () => {
                 styles.iconBox,
                 hasPendingItems ? styles.bgPending : styles.bgCooking,
               ]}>
-              <Ionicons
-                name={order.roomId ? 'business' : 'restaurant'}
-                size={18}
-                color="white"
-              />
+              <View>
+                {order.roomId ? (
+                  <RoomIcon height={14} width={14} fill={'#fff'} />
+                ) : (
+                  <ChairIcon height={14} width={14} />
+                )}
+              </View>
             </View>
             <View>
               <Text style={styles.tableNum}>{order.tableNumber}</Text>
@@ -173,7 +193,11 @@ const KitchenDashboard = () => {
               styles.badge,
               hasPendingItems ? styles.badgeWait : styles.badgeCook,
             ]}>
-            <Text style={styles.badgeText}>
+            <Text
+              style={[
+                styles.badgeText,
+                hasPendingItems ? styles.badgeWaitText : styles.badgeCookText,
+              ]}>
               {hasPendingItems ? 'WAITING' : 'COOKING'}
             </Text>
           </View>
@@ -197,8 +221,10 @@ const KitchenDashboard = () => {
                 </View>
               </View>
               {item.status === 'PREPARING' && (
-                <TouchableOpacity onPress={() => handleMarkItemReady(item.id)}>
-                  <Ionicons name="checkmark-circle" size={26} color="#10b981" />
+                <TouchableOpacity
+                  style={styles.TickBtn}
+                  onPress={() => handleMarkItemReady(item.id)}>
+                  <TickIcon height={20} width={20} />
                 </TouchableOpacity>
               )}
             </View>
@@ -215,11 +241,6 @@ const KitchenDashboard = () => {
               ? handlePrintKOT(order)
               : handleMarkEntireOrderReady(order)
           }>
-          <Ionicons
-            name={hasPendingItems ? 'print' : 'checkmark-done'}
-            size={16}
-            color="white"
-          />
           <Text style={styles.footerBtnText}>
             {hasPendingItems ? 'PRINT KOT' : 'MARK READY'}
           </Text>
@@ -235,8 +256,11 @@ const KitchenDashboard = () => {
       <FlatList
         data={groupedOrders}
         renderItem={renderOrderTicket}
+        numColumns={2} // <--- Add this
+        key={'_'}
         keyExtractor={(item: any) => item.id}
         contentContainerStyle={styles.listPadding}
+        columnWrapperStyle={styles.columnWrapper}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="cafe-outline" size={60} color="#cbd5e1" />
@@ -249,17 +273,24 @@ const KitchenDashboard = () => {
 };
 
 const styles = StyleSheet.create({
-  listPadding: {padding: 16},
+  listPadding: {padding: 8},
+  columnWrapper: {
+    justifyContent: 'space-between', // Spreads the 2 cards to the edges
+    paddingHorizontal: 8,
+  },
   card: {
     backgroundColor: 'white',
-    borderRadius: 16,
+    borderRadius: 12, // Slightly smaller radius looks better in grids
     marginBottom: 16,
-    padding: 16,
-    borderLeftWidth: 5,
+    padding: 12,
+    borderLeftWidth: 4,
     elevation: 3,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 5,
+
+    // Grid Math: (100% / 2 columns) - (margin/gap)
+    width: '48%',
   },
   borderPending: {borderLeftColor: '#f59e0b'},
   borderCooking: {borderLeftColor: '#3b82f6'},
@@ -271,15 +302,19 @@ const styles = StyleSheet.create({
   },
   headerLeft: {flexDirection: 'row', alignItems: 'center', gap: 10},
   iconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: 24,
+    height: 24,
+    borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
   },
   bgPending: {backgroundColor: '#f59e0b'},
-  bgCooking: {backgroundColor: '#1e293b'},
-  tableNum: {fontSize: 16, fontWeight: '900', color: '#1e293b'},
+  bgCooking: {backgroundColor: '#059669'},
+  tableNum: {
+    fontSize: 12, // Smaller for 2-column
+    fontWeight: '900',
+    color: '#1e293b',
+  },
   orderTime: {fontSize: 11, color: '#64748b'},
   badge: {paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6},
   badgeWait: {
@@ -287,14 +322,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#fcd34d',
   },
-  badgeCook: {backgroundColor: '#1e293b'},
-  badgeText: {fontSize: 10, fontWeight: 'bold', color: '#92400e'},
+  badgeWaitText: {
+    color: '#111',
+  },
+  badgeCookText: {
+    color: '#fff',
+  },
+
+  badgeCook: {backgroundColor: '#059669'},
+  badgeText: {fontSize: 8, fontWeight: 'bold', color: '#f3f3f3'},
   itemsList: {marginVertical: 10},
   itemRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 10,
+    padding: 8,
     borderRadius: 10,
     marginBottom: 6,
   },
@@ -304,13 +346,19 @@ const styles = StyleSheet.create({
     borderColor: '#ffedd5',
   },
   itemActive: {backgroundColor: '#f8fafc'},
-  itemInfo: {flexDirection: 'row', alignItems: 'center', gap: 12},
-  itemQty: {fontSize: 18, fontWeight: '900', color: '#94a3b8'},
+  itemInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2, // Reduced gap
+    flex: 1,
+  },
+  itemQty: {fontSize: 14, fontWeight: '900', color: '#94a3b8'},
   itemName: {
-    fontSize: 14,
+    fontSize: 12, // Smaller font
     fontWeight: 'bold',
     color: '#0f172a',
     textTransform: 'uppercase',
+    flexShrink: 1, // Prevent text overflow
   },
   itemStatus: {fontSize: 10, color: '#64748b'},
   footerBtn: {
@@ -321,6 +369,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     marginTop: 10,
+  },
+  TickBtn: {
+    backgroundColor: '#fff',
+    padding: 2,
+    borderRadius: 50,
   },
   btnPrint: {backgroundColor: '#1e293b'},
   btnReady: {backgroundColor: '#059669'},
