@@ -1,5 +1,12 @@
 import React, {useEffect, useState, useMemo} from 'react';
-import {StyleSheet, View, FlatList, TouchableOpacity, Text} from 'react-native';
+import {
+  StyleSheet,
+  View,
+  FlatList,
+  TouchableOpacity,
+  Text,
+  ScrollView,
+} from 'react-native';
 import MainLayout from '../MainLayout';
 
 import {io} from 'socket.io-client';
@@ -202,35 +209,38 @@ const KitchenDashboard = () => {
             </Text>
           </View>
         </View>
-
-        <View style={styles.itemsList}>
-          {order.items.map((item: any) => (
-            <View
-              key={item.id}
-              style={[
-                styles.itemRow,
-                item.status === 'PENDING'
-                  ? styles.itemPending
-                  : styles.itemActive,
-              ]}>
-              <View style={styles.itemInfo}>
-                <Text style={styles.itemQty}>{item.quantity}×</Text>
-                <View>
-                  <Text style={styles.itemName}>{item.menuItem?.name}</Text>
-                  <Text style={styles.itemStatus}>{item.status}</Text>
+        <ScrollView
+          style={styles.itemsScrollView}
+          nestedScrollEnabled={true} // Important for Android inside a FlatList
+          showsVerticalScrollIndicator={true}>
+          <View style={styles.itemsList}>
+            {order.items.map((item: any) => (
+              <View
+                key={item.id}
+                style={[
+                  styles.itemRow,
+                  item.status === 'PENDING'
+                    ? styles.itemPending
+                    : styles.itemActive,
+                ]}>
+                <View style={styles.itemInfo}>
+                  <Text style={styles.itemQty}>{item.quantity}×</Text>
+                  <View>
+                    <Text style={styles.itemName}>{item.menuItem?.name}</Text>
+                    <Text style={styles.itemStatus}>{item.status}</Text>
+                  </View>
                 </View>
+                {item.status === 'PREPARING' && (
+                  <TouchableOpacity
+                    style={styles.TickBtn}
+                    onPress={() => handleMarkItemReady(item.id)}>
+                    <TickIcon height={20} width={20} />
+                  </TouchableOpacity>
+                )}
               </View>
-              {item.status === 'PREPARING' && (
-                <TouchableOpacity
-                  style={styles.TickBtn}
-                  onPress={() => handleMarkItemReady(item.id)}>
-                  <TickIcon height={20} width={20} />
-                </TouchableOpacity>
-              )}
-            </View>
-          ))}
-        </View>
-
+            ))}
+          </View>
+        </ScrollView>
         <TouchableOpacity
           style={[
             styles.footerBtn,
@@ -288,6 +298,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 5,
+    // maxHeight: 70,
 
     // Grid Math: (100% / 2 columns) - (margin/gap)
     width: '48%',
@@ -331,6 +342,11 @@ const styles = StyleSheet.create({
 
   badgeCook: {backgroundColor: '#059669'},
   badgeText: {fontSize: 8, fontWeight: 'bold', color: '#f3f3f3'},
+  itemsScrollView: {
+    // This is the magic part:
+    maxHeight: 210, // Limits the list height
+    marginVertical: 8,
+  },
   itemsList: {marginVertical: 10},
   itemRow: {
     flexDirection: 'row',

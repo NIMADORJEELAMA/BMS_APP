@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import {
   StyleSheet,
   View,
@@ -10,56 +10,86 @@ import {
   Platform,
   SafeAreaView,
   StatusBar,
+  Text,
+  ScrollView, // Added for UI stability
 } from 'react-native';
-import {Text, Div} from '../../components/common/UI';
+import {useFocusEffect} from '@react-navigation/native'; // Ensure fields reset on logout
+import {Div} from '../../components/common/UI';
 import {authService} from '../../services/authService';
 import {setToken, setUser} from '../../redux/slices/authSlice';
 import {useDispatch} from 'react-redux';
 import {saveToken, saveUser} from '../../utils/storage';
 import EyeOpen from '../../assets/Icons/eye_open.svg';
-
 import EyeClosed from '../../assets/Icons/eye_closed.svg';
 import {useNotifications} from '../../hooks/useNotifications';
+import DeviceInfo from 'react-native-device-info';
 
 const LoginScreenBms = () => {
-  const [email, setEmail] = useState('Santosh@gmail.com');
-  const [password, setPassword] = useState('123123');
+  const version = DeviceInfo.getVersion();
+  // Get the build number (e.g., "15" - useful for internal tracking)
+  const buildNumber = DeviceInfo.getBuildNumber();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState<{
+    email?: string;
+    password?: string;
+    general?: string;
+  }>({});
 
   const dispatch = useDispatch();
   const {registerDevice} = useNotifications(false);
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Missing Info', 'Please fill in both email and password.');
-      return;
+
+  // Clears the form when navigating back to login (Logout scenario)
+  useFocusEffect(
+    useCallback(() => {
+      setEmail('');
+      setPassword('');
+      setErrors({});
+    }, []),
+  );
+
+  const validate = () => {
+    let valid = true;
+    let newErrors: any = {};
+    if (!email.includes('@')) {
+      newErrors.email = 'Enter a valid resort email';
+      valid = false;
     }
+    if (password.length < 4) {
+      newErrors.password = 'Password is too short';
+      valid = false;
+    }
+    setErrors(newErrors);
+    return valid;
+  };
+
+  const handleLogin = async () => {
+    setErrors({});
+    if (!validate()) return;
 
     setLoading(true);
     try {
       const response = await authService.login({email, password});
       const token = response?.access_token;
       const userData = response?.user;
-      console.log('response >>', response);
+
       if (token) {
         await saveToken(token);
         await saveUser(userData);
         dispatch(setToken(token));
         dispatch(setUser(userData));
-
         setTimeout(async () => {
           await registerDevice();
         }, 500);
-      } else {
-        Alert.alert('Login Error', "We couldn't verify your session.");
       }
     } catch (error: any) {
-      // Custom error messaging based on status code
       const status = error.response?.status;
       if (status === 401) {
-        Alert.alert('Access Denied', 'Invalid email or password.');
+        setErrors({general: 'Invalid email or password.'});
       } else {
-        Alert.alert('Network Error', 'Server is currently unreachable.');
+        setErrors({general: 'Network error. Please try again later.'});
       }
     } finally {
       setLoading(false);
@@ -68,77 +98,109 @@ const LoginScreenBms = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.flex}>
-        <Div style={styles.inner}>
-          {/* Top Brand Section */}
-          <Div style={styles.header}>
-            <View style={styles.logoCircle}>
-              <Text style={styles.logoEmoji}>🌴</Text>
-            </View>
-            <Text style={styles.title}>Minizeo</Text>
-            <Text style={styles.subtitle}>RESORT TERMINAL</Text>
-          </Div>
-
-          {/* Login Card */}
-          <Div style={styles.formCard}>
-            <Text style={styles.formTitle}>Welcome Back</Text>
-            <Text style={styles.formSubtitle}>
-              Sign in to manage your floor
-            </Text>
-
-            <Div style={styles.inputGroup}>
-              <Text style={styles.label}>EMAIL</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="name@resort.com"
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-              />
-            </Div>
-
-            <Div style={styles.inputGroup}>
-              <Text style={styles.label}>PASSWORD</Text>
-              <View style={styles.passwordWrapper}>
-                <TextInput
-                  style={[styles.input, {flex: 1, borderWidth: 0}]}
-                  placeholder="••••••••"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                  style={styles.eyeBtn}>
-                  {showPassword ? (
-                    <EyeOpen width={20} height={20} fill="#94A3B8" />
-                  ) : (
-                    <EyeClosed width={20} height={20} fill="#94A3B8" />
-                  )}
-                </TouchableOpacity>
+        <ScrollView
+          contentContainerStyle={styles.scrollGrow}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
+          <Div style={styles.inner}>
+            {/* Header */}
+            <View style={styles.header}>
+              <View style={styles.logoCircle}>
+                <Text style={styles.logoEmoji}>🌴</Text>
               </View>
-            </Div>
+              <Text style={styles.title}>Minizeo</Text>
+              <Text style={styles.subtitle}>RESORT TERMINAL</Text>
+            </View>
 
-            <TouchableOpacity
-              style={[styles.loginButton, loading && styles.disabledButton]}
-              onPress={handleLogin}
-              disabled={loading}>
-              {loading ? (
-                <ActivityIndicator color="#FFF" />
-              ) : (
-                <Text style={styles.loginButtonText}>Login</Text>
+            {/* Form */}
+            <View style={styles.formCard}>
+              <Text style={styles.formTitle}>Welcome Back</Text>
+              <Text style={styles.formSubtitle}>
+                Sign in to manage your floor
+              </Text>
+
+              {/* Email */}
+              <View style={styles.inputGroup}>
+                <Text
+                  style={[styles.label, errors.email && {color: '#EF4444'}]}>
+                  EMAIL
+                </Text>
+                <TextInput
+                  style={[styles.input, errors.email && styles.inputError]}
+                  placeholder="name@resort.com"
+                  placeholderTextColor="#94A3B8"
+                  value={email}
+                  onChangeText={setEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+                {errors.email && (
+                  <Text style={styles.errorSubText}>{errors.email}</Text>
+                )}
+              </View>
+
+              {/* Password */}
+              <View style={styles.inputGroup}>
+                <Text
+                  style={[styles.label, errors.password && {color: '#EF4444'}]}>
+                  PASSWORD
+                </Text>
+                <View
+                  style={[
+                    styles.passwordWrapper,
+                    errors.password && styles.inputError,
+                  ]}>
+                  <TextInput
+                    style={styles.passwordInput}
+                    placeholder="••••••"
+                    placeholderTextColor="#94A3B8"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                  />
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                    style={styles.eyeBtn}>
+                    {showPassword ? (
+                      <EyeOpen width={20} height={20} fill="#94A3B8" />
+                    ) : (
+                      <EyeClosed width={20} height={20} fill="#94A3B8" />
+                    )}
+                  </TouchableOpacity>
+                </View>
+                {errors.password && (
+                  <Text style={styles.errorSubText}>{errors.password}</Text>
+                )}
+              </View>
+
+              {errors.general && (
+                <View style={styles.errorBanner}>
+                  <Text style={styles.errorBannerText}>{errors.general}</Text>
+                </View>
               )}
-            </TouchableOpacity>
-          </Div>
 
-          <Text style={styles.footerText}>
-            Build v2.0.4 •{' '}
-            <Text style={styles.statusOnline}>System Active</Text>
-          </Text>
-        </Div>
+              <TouchableOpacity
+                style={[styles.loginButton, loading && styles.disabledButton]}
+                onPress={handleLogin}
+                disabled={loading}>
+                {loading ? (
+                  <ActivityIndicator color="#FFF" />
+                ) : (
+                  <Text style={styles.loginButtonText}>Login</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.footerText}>
+              Build {version} •{' '}
+              <Text style={styles.statusOnline}>System Active</Text>
+            </Text>
+          </Div>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -147,7 +209,16 @@ const LoginScreenBms = () => {
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: '#F8FAFC'},
   flex: {flex: 1},
-  inner: {flex: 1, padding: 24, justifyContent: 'center'},
+  scrollGrow: {
+    flexGrow: 1,
+    //  justifyContent: 'center'
+  },
+  inner: {
+    padding: 24,
+    flex: 1,
+    justifyContent: 'center', // Move centering here
+    minHeight: '100%',
+  },
   header: {alignItems: 'center', marginBottom: 32},
   logoCircle: {
     width: 80,
@@ -174,6 +245,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderRadius: 24,
     padding: 24,
+    minHeight: 400, // Give the card a minimum height so it doesn't "pop" in
     elevation: 8,
     shadowColor: '#000',
     shadowOpacity: 0.08,
@@ -200,16 +272,40 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E2E8F0',
   },
-  eyeBtn: {paddingHorizontal: 16},
+  passwordInput: {
+    flex: 1,
+    padding: 16,
+    fontSize: 16,
+    color: '#1E293B',
+  },
+  inputError: {borderColor: '#EF4444', backgroundColor: '#FEF2F2'},
+  errorSubText: {
+    color: '#EF4444',
+    fontSize: 10,
+    marginTop: 4,
+    fontWeight: '600',
+  },
+  errorBanner: {
+    backgroundColor: '#FEF2F2',
+    padding: 12,
+    borderRadius: 12,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#FCA5A5',
+  },
+  errorBannerText: {
+    color: '#991B1B',
+    fontSize: 13,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  eyeBtn: {paddingRight: 16},
   loginButton: {
-    backgroundColor: '#FC8019', // Swiggy Orange
+    backgroundColor: '#FC8019',
     paddingVertical: 18,
     borderRadius: 12,
     marginTop: 24,
     alignItems: 'center',
-    shadowColor: '#FC8019',
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
     elevation: 5,
   },
   loginButtonText: {color: '#FFF', fontSize: 16, fontWeight: '800'},

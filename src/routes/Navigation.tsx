@@ -35,8 +35,8 @@ import PhoneNumber from '../screens/Settings/PhoneNumber';
 import Email from '../screens/Settings/Email';
 import Location from '../screens/Settings/Location';
 import {useDispatch, useSelector} from 'react-redux';
-import {getToken, getUser} from '../utils/storage';
-import {setToken, setUser} from '../redux/slices/authSlice';
+import {clearAuthData, getToken, getUser} from '../utils/storage';
+import {logout, setToken, setUser} from '../redux/slices/authSlice';
 import LoginScreenBms from '../screens/LoginScreenBms';
 import OrderPage from '../screens/OrderPage';
 import CartScreen from '../screens/CartScreen';
@@ -253,24 +253,24 @@ const Navigation = () => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // 1. Fetch both from Storage
+        // 1. Pull from your storage utilities
         const storedToken = await getToken();
-        const storedUser = await getUser(); // Call your new utility
+        const storedUser = await getUser();
 
+        // 2. Strict validation
         if (storedToken && storedUser) {
-          // 2. Restore to Redux
           dispatch(setToken(storedToken));
           dispatch(setUser(storedUser));
         } else {
-          // If either is missing, ensure state is clean
-          dispatch(setToken(null));
-          dispatch(setUser(null));
+          // If data is partial or missing, ensure storage is 100% clean
+          await clearAuthData();
+          dispatch(logout());
         }
       } catch (e) {
-        console.error('Failed to load auth data', e);
-        dispatch(setToken(null));
+        console.error('Auth Restore Failed', e);
+        dispatch(logout());
       } finally {
-        // Ensure you have a 'setLoading' action or that setToken handles it
+        // If your slice has a setLoading, call it here
         // dispatch(setLoading(false));
       }
     };

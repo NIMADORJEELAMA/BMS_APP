@@ -3853,6 +3853,7 @@ __metadata:
     prettier: 2.8.8
     react: 19.0.0
     react-native: 0.79.0
+    react-native-device-info: ^15.0.1
     react-native-fast-image: ^8.6.3
     react-native-gesture-handler: ^2.25.0
     react-native-image-crop-picker: ^0.42.0
@@ -9183,6 +9184,15 @@ __metadata:
   dependencies:
     prop-types: ^15.8.1
   checksum: a1b211aff745b97351d78643d641fa298f7d71524eaf22fee8a69257ce52e85d6b3caf8e7fd26a521af34984fba7402b7c632c35ea69d618769387d1dcb6b32a
+  languageName: node
+  linkType: hard
+
+"react-native-device-info@npm:^15.0.1":
+  version: 15.0.1
+  resolution: "react-native-device-info@npm:15.0.1"
+  peerDependencies:
+    react-native: "*"
+  checksum: e7c20006db07758fcf820e891b979b9d7e87c10b6a38066402d60d85ff1dc8e1ac47e8b57209bf394f20516fb49600cde6688cd6f7cfe7210f285555960a74e4
   languageName: node
   linkType: hard
 
