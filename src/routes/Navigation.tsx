@@ -190,7 +190,7 @@ const TabNavigator: React.FC = () => {
           }}
         />
       )}
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Message"
         component={HomeScreen}
         options={{
@@ -214,7 +214,7 @@ const TabNavigator: React.FC = () => {
             />
           ),
         }}
-      />
+      /> */}
       <Tab.Screen
         name="ProfileScreenBms"
         component={ProfileScreenBms}

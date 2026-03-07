@@ -6,6 +6,7 @@ import {
   Dimensions,
   ImageBackground,
   StatusBar,
+  Image,
 } from 'react-native';
 import {Text} from '../components/common/UI';
 
@@ -46,14 +47,19 @@ const SplashScreen = () => {
             {opacity: fadeAnim, transform: [{scale: scaleAnim}]},
           ]}>
           {/* Circular Logo */}
-          <View style={styles.logoCircle}>
-            {/* Replace the emoji with <Image source={...} /> for your real logo */}
-            <Text style={styles.logoEmoji}>🏨</Text>
-          </View>
 
-          <Text style={styles.brandName}>Hill Top Resort</Text>
+          {/* Replace the emoji with <Image source={...} /> for your real logo */}
+          <View style={styles.logoContainer}>
+            <Image
+              source={require('../assets/images/logo11.jpg')} // Update this path!
+              style={styles.logoImage}
+              resizeMode="cover"
+            />
+          </View>
+          <Text style={styles.brandName}>Gairigaon</Text>
+
+          <Text style={styles.brandName}>Hill Top Eco Tourism</Text>
           <View style={styles.divider} />
-          <Text style={styles.tagline}>POS TERMINAL</Text>
         </Animated.View>
 
         <View style={styles.footer}></View>
@@ -95,8 +101,35 @@ const styles = StyleSheet.create({
     // Android Shadow
     elevation: 12,
   },
+
   logoEmoji: {
     fontSize: 60,
+  },
+
+  logoContainer: {
+    // Keeps the logo centered and slightly raised
+    marginBottom: 10,
+    // Add shadow (iOS) and elevation (Android) for depth
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  logoImage: {
+    // Sets the specific size of the logo
+    width: 80, // Adjust as needed
+    height: 80, // Adjust as needed
+
+    // Creates the PERFECT CIRCLE
+    // Note: borderRadius MUST be exactly HALF of width/height
+    borderRadius: 40,
+
+    // Creates a nice border around the circle
+    borderWidth: 2,
+    borderColor: '#E5E7EB', // Slate 200 (gray)
+
+    backgroundColor: 'white', // Keeps the image clean if it has transparency
   },
   brandName: {
     fontSize: 36,

@@ -244,7 +244,7 @@ const TableSelectionScreen = ({navigation}: any) => {
       rightComponent={
         <View>
           <TouchableOpacity
-            onPress={() => navigation.navigate('Profile')}
+            onPress={() => navigation.navigate('ProfileScreenBms')}
             style={styles.profileCircle}>
             <ProfileIcon width={18} height={18} fill="#94A3B8" />
           </TouchableOpacity>

@@ -42,7 +42,7 @@ const OrderPage = ({route}: any) => {
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [isVegOnly, setIsVegOnly] = useState(false);
-  const [selectedType, setSelectedType] = useState<'FOOD' | 'ALCOHOL'>('FOOD');
+  const [selectedType, setSelectedType] = useState<'FOOD' | 'DRINKS'>('FOOD');
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [isOrdering, setIsOrdering] = useState(false);
@@ -354,9 +354,9 @@ const OrderPage = ({route}: any) => {
             showsHorizontalScrollIndicator={false}
             style={{overflow: 'visible'}}
             contentContainerStyle={styles.filterScroll}>
-            {/* Food/Alcohol Toggle */}
+            {/* Food/Drinks Toggle */}
             <View style={styles.slider}>
-              {['FOOD', 'ALCOHOL'].map((t: any) => (
+              {['FOOD', 'DRINKS'].map((t: any) => (
                 <TouchableOpacity
                   key={t}
                   style={[

@@ -11,7 +11,8 @@ import {
   SafeAreaView,
   StatusBar,
   Text,
-  ScrollView, // Added for UI stability
+  ScrollView,
+  Image, // Added for UI stability
 } from 'react-native';
 import {useFocusEffect} from '@react-navigation/native'; // Ensure fields reset on logout
 import {Div} from '../../components/common/UI';
@@ -109,11 +110,15 @@ const LoginScreenBms = () => {
           <Div style={styles.inner}>
             {/* Header */}
             <View style={styles.header}>
-              <View style={styles.logoCircle}>
-                <Text style={styles.logoEmoji}>🌴</Text>
+              <View style={styles.logoContainer}>
+                <Image
+                  source={require('../../assets/images/logo11.jpg')} // Update this path!
+                  style={styles.logoImage}
+                  resizeMode="cover"
+                />
               </View>
-              <Text style={styles.title}>Minizeo</Text>
-              <Text style={styles.subtitle}>RESORT TERMINAL</Text>
+              <Text style={styles.title}>Gairigaon</Text>
+              <Text style={styles.subtitle}>Hill Top Eco Tourism</Text>
             </View>
 
             {/* Form */}
@@ -131,7 +136,7 @@ const LoginScreenBms = () => {
                 </Text>
                 <TextInput
                   style={[styles.input, errors.email && styles.inputError]}
-                  placeholder="name@resort.com"
+                  placeholder="name@hilltop.com"
                   placeholderTextColor="#94A3B8"
                   value={email}
                   onChangeText={setEmail}
@@ -234,6 +239,31 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
   },
   logoEmoji: {fontSize: 40},
+  logoContainer: {
+    // Keeps the logo centered and slightly raised
+    marginBottom: 10,
+    // Add shadow (iOS) and elevation (Android) for depth
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  logoImage: {
+    // Sets the specific size of the logo
+    width: 80, // Adjust as needed
+    height: 80, // Adjust as needed
+
+    // Creates the PERFECT CIRCLE
+    // Note: borderRadius MUST be exactly HALF of width/height
+    borderRadius: 40,
+
+    // Creates a nice border around the circle
+    borderWidth: 2,
+    borderColor: '#E5E7EB', // Slate 200 (gray)
+
+    backgroundColor: 'white', // Keeps the image clean if it has transparency
+  },
   title: {fontSize: 32, fontWeight: '900', color: '#1E293B'},
   subtitle: {
     fontSize: 12,
