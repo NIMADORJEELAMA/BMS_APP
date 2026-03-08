@@ -80,9 +80,11 @@ const OrderPage = ({route}: any) => {
     const fetchMenu = async () => {
       try {
         const data = await orderService.getMenu();
+        console.log('data', data);
         // Automatically hide inactive items
         setMenuItems(data.filter((item: any) => item.isActive));
       } catch (err) {
+        console.log('err', err);
         console.error('Failed to fetch menu:', err);
       }
     };

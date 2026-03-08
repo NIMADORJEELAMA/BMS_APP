@@ -29,6 +29,7 @@ const KitchenDashboard = () => {
   const fetchKitchenQueue = async () => {
     try {
       const res = await api.get('/orders/kitchen/pending');
+      console.log('res.data', res.data);
       setRawItems(res.data);
     } catch (err) {
       console.error('Error fetching kitchen queue:', err);
@@ -209,6 +210,7 @@ const KitchenDashboard = () => {
             </Text>
           </View>
         </View>
+
         <ScrollView
           style={styles.itemsScrollView}
           nestedScrollEnabled={true} // Important for Android inside a FlatList
@@ -226,7 +228,14 @@ const KitchenDashboard = () => {
                 <View style={styles.itemInfo}>
                   <Text style={styles.itemQty}>{item.quantity}×</Text>
                   <View>
-                    <Text style={styles.itemName}>{item.menuItem?.name}</Text>
+                    <Text style={styles.itemName}>
+                      {item.menuItem?.name}{' '}
+                      {item.order?.isSpicy && <Text>🌶️</Text>}
+                    </Text>
+
+                    {item.order?.note && (
+                      <Text style={styles.itemNote}>"{item.order.note}"</Text>
+                    )}
                     <Text style={styles.itemStatus}>{item.status}</Text>
                   </View>
                 </View>
@@ -368,15 +377,38 @@ const styles = StyleSheet.create({
     gap: 2, // Reduced gap
     flex: 1,
   },
-  itemQty: {fontSize: 14, fontWeight: '900', color: '#94a3b8'},
+  itemQty: {fontSize: 12, fontWeight: '900', color: '#94a3b8'},
   itemName: {
-    fontSize: 12, // Smaller font
+    fontSize: 10, // Smaller font
     fontWeight: 'bold',
     color: '#0f172a',
     textTransform: 'uppercase',
     flexShrink: 1, // Prevent text overflow
   },
-  itemStatus: {fontSize: 10, color: '#64748b'},
+  itemNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  itemNote: {
+    fontSize: 10,
+    fontStyle: 'italic',
+    color: '#d97706', // Amber/Orange color to stand out
+    fontWeight: '600',
+    marginTop: 2,
+    backgroundColor: '#fffbeb', // Light yellow background for the note
+    paddingHorizontal: 4,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+  },
+  // Update itemName to ensure it doesn't push the flame icon out
+  // itemName: {
+  //   fontSize: 12,
+  //   fontWeight: 'bold',
+  //   color: '#0f172a',
+  //   textTransform: 'uppercase',
+  // },
+  itemStatus: {fontSize: 9, color: '#64748b'},
   footerBtn: {
     flexDirection: 'row',
     padding: 12,

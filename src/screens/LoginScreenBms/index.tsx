@@ -75,6 +75,7 @@ const LoginScreenBms = () => {
       const response = await authService.login({email, password});
       const token = response?.access_token;
       const userData = response?.user;
+      console.log('token', token);
 
       if (token) {
         await saveToken(token);
