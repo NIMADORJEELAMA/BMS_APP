@@ -1,11 +1,6 @@
 import React, {useState, useRef} from 'react';
-import {
-  StyleSheet,
-  TouchableOpacity,
-  FlatList,
-  Animated,
-  Text,
-} from 'react-native';
+import {StyleSheet, TouchableOpacity, Animated, Text} from 'react-native';
+import {FlatList} from 'react-native-gesture-handler';
 import {Div} from './common/UI';
 import ArrowDownIcon from '../assets/Icons/chevrondown.svg'; // Adjust path
 
@@ -78,6 +73,8 @@ const CustomDropdown = ({
           <FlatList
             data={options}
             keyExtractor={item => item.value.toString()}
+            nestedScrollEnabled={true}
+            keyboardShouldPersistTaps="handled"
             scrollEnabled={options.length > 5}
             style={{maxHeight: 250}}
             renderItem={({item}) => (

@@ -198,7 +198,6 @@ const OrderPage = ({route}: any) => {
   );
 
   const renderGridItem = ({item}: any) => {
-    console.log('item', item);
     const quantity = cartItems[item.id]?.quantity || 0;
 
     return (

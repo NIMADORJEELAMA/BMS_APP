@@ -239,7 +239,7 @@ const TableSelectionScreen = ({navigation}: any) => {
 
   return (
     <MainLayout
-      title="Hill Top Resort"
+      title="Hill Top Eco Tourism"
       // subtitle="Select a table to start"
       rightComponent={
         <View>

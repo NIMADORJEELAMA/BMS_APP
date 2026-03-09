@@ -49,11 +49,12 @@ const CartScreen = ({route, navigation}: any) => {
     try {
       const payload = {
         tableId: tableId,
-        isSpicy: isSpicy, // Global field
+        // isSpicy: isSpicy, // Global field
         note: orderNote,
         items: itemList.map(item => ({
           menuItemId: item.id,
           quantity: item.quantity,
+          isSpicy: !!item.isSpicy,
         })),
       };
       console.log('payload', payload);
@@ -151,6 +152,30 @@ const CartScreen = ({route, navigation}: any) => {
                         <Text style={styles.qtyBtnText}>+</Text>
                       </TouchableOpacity>
                     </View>
+                    <View>
+                      <TouchableOpacity
+                        onPress={() =>
+                          dispatch(
+                            updateCartQuantity({
+                              item,
+                              delta: 0,
+                              toggleSpicy: true,
+                            }),
+                          )
+                        }
+                        style={[
+                          styles.miniSpicyBadge,
+                          item.isSpicy && styles.miniSpicyActive,
+                        ]}>
+                        <Text
+                          style={[
+                            styles.miniSpicyText,
+                            item.isSpicy && {color: '#fff'},
+                          ]}>
+                          🌶️
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 )
               ),
@@ -181,7 +206,7 @@ const CartScreen = ({route, navigation}: any) => {
           )} */}
 
           <View style={styles.sectionCard}>
-            <View style={styles.preferenceRow}>
+            {/* <View style={styles.preferenceRow}>
               <View>
                 <Text style={styles.prefLabel}>Mark all as Spicy?</Text>
                 <Text style={styles.prefSub}>
@@ -196,7 +221,7 @@ const CartScreen = ({route, navigation}: any) => {
                   🌶️ {isSpicy ? 'YES' : 'NO'}
                 </Text>
               </TouchableOpacity>
-            </View>
+            </View> */}
 
             <View style={styles.noteContainer}>
               <Text style={styles.noteLabel}>Cooking Instructions / Notes</Text>
@@ -285,6 +310,23 @@ const styles = StyleSheet.create({
   itemName: {fontSize: 14, fontWeight: '700', color: swiggyColors.textPrimary},
   itemPrice: {fontSize: 13, color: swiggyColors.textSecondary, marginTop: 2},
 
+  miniSpicyBadge: {
+    marginLeft: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    backgroundColor: '#F8FAFC',
+  },
+  miniSpicyActive: {
+    backgroundColor: '#EF4444',
+    borderColor: '#EF4444',
+  },
+  miniSpicyText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
   qtyContainer: {
     flexDirection: 'row',
     alignItems: 'center',
