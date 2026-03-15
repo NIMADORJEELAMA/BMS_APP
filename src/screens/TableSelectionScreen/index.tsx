@@ -192,7 +192,7 @@ const TableSelectionScreen = ({navigation}: any) => {
                 </Text>
               </View>
               <View>
-                <Text style={styles.totalLabel}>Running Total</Text>
+                <Text style={styles.totalLabel}>Total</Text>
                 <Text style={styles.priceText}>
                   ₹{item.activeOrder.runningTotal}
                 </Text>
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
   //
   // Table Card Adjustments
   tableCard: {
-    width: ITEM_WIDTH - 20,
+    width: ITEM_WIDTH - 14,
     margin: 10,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,

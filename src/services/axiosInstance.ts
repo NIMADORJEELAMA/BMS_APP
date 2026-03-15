@@ -17,7 +17,7 @@ const LOCAL_IP = '192.168.1.12';
 
 // 1. Create the instance
 const axiosInstance = axios.create({
-  baseURL: BASE_URL,
+  baseURL: stagingUrl,
   timeout: 15000,
 });
 
