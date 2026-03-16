@@ -44,6 +44,8 @@ import RoomSelectionScreen from '../screens/RoomSelectionScreen';
 import SplashScreen from '../screens/SplashScreen';
 import HomeIcon from '../assets/Icons/home-icon-silhouette-svgrepo-com.svg';
 import KitchenIcon from '../assets/Icons/kitchen-room.svg';
+import AttendanceIcon from '../assets/Icons/tasks-app.svg';
+import CashIcon from '../assets/Icons/cash.svg';
 
 import ProfileIcon from '../assets/Icons/profile.svg';
 import ProfileScreenBms from '../screens/ProfileScreenBms';
@@ -194,56 +196,68 @@ const TabNavigator: React.FC = () => {
           }}
         />
       )}
-      <Tab.Screen
-        name="Attendance"
-        component={AdminAttendanceScreen}
-        options={{
-          headerShown: false,
-          tabBarButton: (props: any) => (
-            <AnimatedTabButton
-              {...props}
-              label="Message"
-              icon={
-                <Svg width="22" height="20" viewBox="0 0 22 20" fill="none">
-                  <Path
-                    d="M16.3726 6.17276C19.0986 7.39695 21 10.1611 21 13.375V16.75C21 17.9926 20.0051 19 18.7778 19H12.1111C9.2084 19 6.73898 17.1217 5.82379 14.5M16.3726 6.17276C15.6711 3.20566 13.0344 1 9.88889 1H8.77778C4.48223 1 1 4.52576 1 8.875V12.25C1 13.4926 1.99492 14.5 3.22222 14.5H5.82379M16.3726 6.17276C16.4922 6.67875 16.5556 7.20688 16.5556 7.75C16.5556 11.4779 13.5708 14.5 9.88889 14.5H5.82379"
-                    stroke={
-                      props?.accessibilityState?.selected ? '#fa2c37' : 'gray'
-                    }
-                    stroke-width="1.5"
-                    stroke-linejoin="round"
-                  />
-                </Svg>
-              }
-            />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="PettyCash"
-        component={AdminPettyCashScreen}
-        options={{
-          headerShown: false,
-          tabBarButton: (props: any) => (
-            <AnimatedTabButton
-              {...props}
-              label="Message"
-              icon={
-                <Svg width="22" height="20" viewBox="0 0 22 20" fill="none">
-                  <Path
-                    d="M16.3726 6.17276C19.0986 7.39695 21 10.1611 21 13.375V16.75C21 17.9926 20.0051 19 18.7778 19H12.1111C9.2084 19 6.73898 17.1217 5.82379 14.5M16.3726 6.17276C15.6711 3.20566 13.0344 1 9.88889 1H8.77778C4.48223 1 1 4.52576 1 8.875V12.25C1 13.4926 1.99492 14.5 3.22222 14.5H5.82379M16.3726 6.17276C16.4922 6.67875 16.5556 7.20688 16.5556 7.75C16.5556 11.4779 13.5708 14.5 9.88889 14.5H5.82379"
-                    stroke={
-                      props?.accessibilityState?.selected ? '#fa2c37' : 'gray'
-                    }
-                    stroke-width="1.5"
-                    stroke-linejoin="round"
-                  />
-                </Svg>
-              }
-            />
-          ),
-        }}
-      />
+      {role == 'ADMIN' && (
+        <Tab.Screen
+          name="Attendance"
+          component={AdminAttendanceScreen}
+          options={{
+            headerShown: false,
+            tabBarButton: (props: any) => {
+              // Check if the tab is currently selected
+              const isSelected = props?.accessibilityState?.selected;
+
+              return (
+                <AnimatedTabButton
+                  {...props}
+                  label="Attendance"
+                  icon={
+                    <AttendanceIcon
+                      height={22}
+                      width={22}
+                      fill={isSelected ? '#000000' : '#f3f3f3'}
+                      stroke={isSelected ? '#000000' : '#f3f3f3'}
+                      // strokeWidth="1.5"
+                      // strokeLinecap="round"
+                      // strokeLinejoin="round"
+                    />
+                  }
+                />
+              );
+            },
+          }}
+        />
+      )}
+      {role == 'ADMIN' && (
+        <Tab.Screen
+          name="PettyCash"
+          component={AdminPettyCashScreen}
+          options={{
+            headerShown: false,
+            tabBarButton: (props: any) => {
+              // Check if the tab is currently selected
+              const isSelected = props?.accessibilityState?.selected;
+
+              return (
+                <AnimatedTabButton
+                  {...props}
+                  label="PettyCash"
+                  icon={
+                    <CashIcon
+                      height={22}
+                      width={22}
+                      fill={isSelected ? '#000000' : 'gray'}
+                      stroke={isSelected ? '#000000' : 'gray'}
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  }
+                />
+              );
+            },
+          }}
+        />
+      )}
 
       <Tab.Screen
         name="ProfileScreenBms"

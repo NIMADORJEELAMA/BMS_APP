@@ -19,6 +19,8 @@ import KitchenIcon from '../../assets/Icons/kitchen-room.svg';
 import PettyCashModal from './PettyCashModal';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CustomDropdown from '../../components/CustomDropdown';
+import swiggyColors from '../../assets/Color/swiggyColor';
+import color from '../../assets/Color/color';
 
 export default function AdminPettyCashScreen() {
   const [loading, setLoading] = useState(true);
@@ -132,8 +134,8 @@ export default function AdminPettyCashScreen() {
     <MainLayout title="Petty Cash" showBack>
       <View style={styles.container}>
         <View style={styles.headerMetric}>
-          <View>
-            <Text style={styles.metricLabel}>Total Period Outflow</Text>
+          <View style={styles.cont_total}>
+            <Text style={styles.metricLabel}>Total Advance</Text>
             <Text style={styles.metricValue}>
               ₹{data?.totalAmount?.toLocaleString() || '0'}
             </Text>
@@ -248,21 +250,31 @@ const styles = StyleSheet.create({
 
   // Header Metric
   headerMetric: {
-    backgroundColor: '#0f172a',
-    padding: 24,
+    backgroundColor: swiggyColors.background,
+    padding: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  cont_total: {
+    backgroundColor: '#f1f5f9',
+    padding: 8,
+    borderRadius: 12,
+  },
   metricLabel: {
-    color: '#94a3b8',
+    color: swiggyColors.textPrimary,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '900',
     textTransform: 'uppercase',
   },
-  metricValue: {color: '#fff', fontSize: 28, fontWeight: '800', marginTop: 4},
+  metricValue: {
+    color: color.black,
+    fontSize: 20,
+    fontWeight: '800',
+    marginTop: 1,
+  },
   fabButton: {
-    backgroundColor: '#6366f1',
+    backgroundColor: color.black,
     width: 48,
     height: 48,
     borderRadius: 12,

@@ -25,7 +25,7 @@ import swiggyColors from '../../assets/Color/swiggyColor';
 const KitchenDashboard = () => {
   const [rawItems, setRawItems] = useState([]);
   const [printingId, setPrintingId] = useState<string | null>(null);
-
+  const [refreshing, setRefreshing] = useState(false);
   const fetchKitchenQueue = async () => {
     try {
       const res = await api.get('/orders/kitchen/pending');
@@ -267,6 +267,11 @@ const KitchenDashboard = () => {
       </View>
     );
   };
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchKitchenQueue();
+    setRefreshing(false);
+  };
 
   return (
     <MainLayout
@@ -280,6 +285,8 @@ const KitchenDashboard = () => {
         keyExtractor={(item: any) => item.id}
         contentContainerStyle={styles.listPadding}
         columnWrapperStyle={styles.columnWrapper}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="cafe-outline" size={60} color="#cbd5e1" />
