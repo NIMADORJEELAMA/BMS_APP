@@ -44,14 +44,16 @@ import RoomSelectionScreen from '../screens/RoomSelectionScreen';
 import SplashScreen from '../screens/SplashScreen';
 import HomeIcon from '../assets/Icons/home-icon-silhouette-svgrepo-com.svg';
 import KitchenIcon from '../assets/Icons/kitchen-room.svg';
-import AttendanceIcon from '../assets/Icons/tasks-app.svg';
+import AttendanceIcon from '../assets/Icons/attendance1.svg';
 import CashIcon from '../assets/Icons/cash.svg';
+import FoodReportIcon from '../assets/Icons/database.svg';
 
 import ProfileIcon from '../assets/Icons/profile.svg';
 import ProfileScreenBms from '../screens/ProfileScreenBms';
 import KitchenDashboard from '../screens/KitchenDashboard';
 import AdminAttendanceScreen from '../screens/AdminAttendanceScreen';
 import AdminPettyCashScreen from '../screens/AdminPettyCashScreen';
+import AdminPerformanceReportScreen from '../screens/Report/PerformanceReport';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -91,6 +93,7 @@ export type BottomTabParamList = {
   KitchenSelection: undefined;
   Attendance: undefined;
   PettyCash: undefined;
+  FoodReport: undefined;
 
   ProfileScreenBms: undefined;
   Profile: undefined;
@@ -214,9 +217,9 @@ const TabNavigator: React.FC = () => {
                     <AttendanceIcon
                       height={22}
                       width={22}
-                      fill={isSelected ? '#000000' : '#f3f3f3'}
-                      stroke={isSelected ? '#000000' : '#f3f3f3'}
-                      // strokeWidth="1.5"
+                      fill={isSelected ? '#000000' : 'gray'}
+                      stroke={isSelected ? '#000000' : 'gray'}
+                      strokeWidth="0.5"
                       // strokeLinecap="round"
                       // strokeLinejoin="round"
                     />
@@ -250,6 +253,37 @@ const TabNavigator: React.FC = () => {
                       strokeWidth="1.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
+                    />
+                  }
+                />
+              );
+            },
+          }}
+        />
+      )}
+      {role == 'ADMIN' && (
+        <Tab.Screen
+          name="FoodReport"
+          component={AdminPerformanceReportScreen}
+          options={{
+            headerShown: false,
+            tabBarButton: (props: any) => {
+              // Check if the tab is currently selected
+              const isSelected = props?.accessibilityState?.selected;
+
+              return (
+                <AnimatedTabButton
+                  {...props}
+                  label="Food Report"
+                  icon={
+                    <FoodReportIcon
+                      height={22}
+                      width={22}
+                      fill={isSelected ? '#000000' : 'gray'}
+                      stroke={isSelected ? '#000000' : 'gray'}
+                      // strokeWidth="1.5"
+                      // strokeLinecap="round"
+                      // strokeLinejoin="round"
                     />
                   }
                 />

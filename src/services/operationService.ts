@@ -54,4 +54,29 @@ export const operationService = {
     const response = await axiosInstance.post('operations/petty-cash', data);
     return response.data;
   },
+
+  getPerformanceReport: async (
+    startDate: string,
+    endDate: string,
+    userId?: string,
+  ) => {
+    console.log('startDate, endDate', startDate, endDate);
+    const response = await axiosInstance.get('orders/reports/performance', {
+      params: {
+        startDate,
+        endDate,
+        // Ensure 'ALL' is handled so it doesn't send "ALL" as a string to the backend
+        userId: userId === 'ALL' ? undefined : userId,
+        page: 1,
+        limit: 1000,
+        search: '',
+      },
+    });
+    console.log('response', response);
+
+    // The API returns the whole object (summary, topSellingItems, etc.)
+    // We return response.data directly so 'setData(res)' in your component
+    // can access data.summary and data.topSellingItems.
+    return response.data;
+  },
 };
