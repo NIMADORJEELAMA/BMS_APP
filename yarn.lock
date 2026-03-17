@@ -3887,12 +3887,14 @@ __metadata:
     react-native-image-crop-picker: ^0.42.0
     react-native-linear-gradient: ^2.8.3
     react-native-modal: ^14.0.0-rc.1
+    react-native-ping: ^1.2.8
     react-native-reanimated: ^3.18.0
     react-native-safe-area-context: ^5.4.0
     react-native-screens: ^4.10.0
     react-native-skeleton-placeholder: ^5.2.4
     react-native-svg: ^15.12.0
     react-native-svg-transformer: ^1.5.1
+    react-native-thermal-receipt-printer-image-qr: ^0.1.12
     react-native-toast-message: ^2.3.3
     react-native-vector-icons: ^10.2.0
     react-redux: ^9.2.0
@@ -4473,7 +4475,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"buffer@npm:^5.5.0":
+"buffer@npm:^5.5.0, buffer@npm:^5.6.0":
   version: 5.7.1
   resolution: "buffer@npm:5.7.1"
   dependencies:
@@ -9298,6 +9300,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-ping@npm:^1.2.8":
+  version: 1.2.8
+  resolution: "react-native-ping@npm:1.2.8"
+  peerDependencies:
+    react-native: ^0.41.2 || ^0.57.0 || ^0.68.0 || ^0.70.0
+  checksum: 8fe0b4f74f8bdf536dfe54aab4a3553db75153c4e5eae59045b53e006f1d7e46ba26c7ddb01074de6654f3467daff632151a3425f44af2ff664841015088c463
+  languageName: node
+  linkType: hard
+
 "react-native-reanimated@npm:^3.18.0":
   version: 3.18.0
   resolution: "react-native-reanimated@npm:3.18.0"
@@ -9383,6 +9394,19 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 0a78333ab4fb1aae38f190a22a1afcbfa2ae9192ccd2ac7a989f3108bd32afe1b84800b4dce0f92c68ad4eca6809046b5f997fbfcb072b872dd34ea04c8f44aa
+  languageName: node
+  linkType: hard
+
+"react-native-thermal-receipt-printer-image-qr@npm:^0.1.12":
+  version: 0.1.12
+  resolution: "react-native-thermal-receipt-printer-image-qr@npm:0.1.12"
+  dependencies:
+    buffer: ^5.6.0
+    iconv-lite: ^0.6.2
+    string_decoder: ^1.3.0
+  peerDependencies:
+    react-native-ping: "*"
+  checksum: 42fffdf10ac9b6df626f84d5e295b269a23717d346e1e570a9d42a186e84621a7ca1b21144e93c0b91fc09c3c8b7b8e80b45a00c788bf74bae74a95c6984b47d
   languageName: node
   linkType: hard
 
@@ -10367,7 +10391,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"string_decoder@npm:^1.1.1":
+"string_decoder@npm:^1.1.1, string_decoder@npm:^1.3.0":
   version: 1.3.0
   resolution: "string_decoder@npm:1.3.0"
   dependencies:

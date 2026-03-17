@@ -55,6 +55,7 @@ import AdminAttendanceScreen from '../screens/AdminAttendanceScreen';
 import AdminPettyCashScreen from '../screens/AdminPettyCashScreen';
 import AdminPerformanceReportScreen from '../screens/Report/PerformanceReport';
 import StaffScreen from '../screens/Staff';
+import PrinterSettings from '../screens/PrinterSettings';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -94,6 +95,7 @@ export type BottomTabParamList = {
   Message: undefined;
 
   KitchenSelection: undefined;
+  PrinterSettings: undefined;
   Attendance: undefined;
   PettyCash: undefined;
   FoodReport: undefined;
@@ -202,6 +204,38 @@ const TabNavigator: React.FC = () => {
           }}
         />
       )}
+      {role == 'KITCHEN' && (
+        <Tab.Screen
+          name="PrinterSettings"
+          component={PrinterSettings}
+          options={{
+            headerShown: false,
+            tabBarButton: (props: any) => {
+              // Check if the tab is currently selected
+              const isSelected = props?.accessibilityState?.selected;
+
+              return (
+                <AnimatedTabButton
+                  {...props}
+                  label="PrinterSettings"
+                  icon={
+                    <KitchenIcon
+                      height={22}
+                      width={22}
+                      fill={isSelected ? '#000000' : 'gray'}
+                      stroke={isSelected ? '#000000' : 'gray'}
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  }
+                />
+              );
+            },
+          }}
+        />
+      )}
+
       {role == 'ADMIN' && (
         <Tab.Screen
           name="Attendance"
