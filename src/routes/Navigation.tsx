@@ -54,6 +54,7 @@ import KitchenDashboard from '../screens/KitchenDashboard';
 import AdminAttendanceScreen from '../screens/AdminAttendanceScreen';
 import AdminPettyCashScreen from '../screens/AdminPettyCashScreen';
 import AdminPerformanceReportScreen from '../screens/Report/PerformanceReport';
+import StaffScreen from '../screens/Staff';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -80,6 +81,8 @@ export type RootStackParamList = {
   Email: undefined;
   Location: undefined;
   HelpCenter: undefined;
+  ProfileScreenBms: undefined;
+  Staff: undefined;
   NotificationSettings: undefined;
 };
 
@@ -95,7 +98,7 @@ export type BottomTabParamList = {
   PettyCash: undefined;
   FoodReport: undefined;
 
-  ProfileScreenBms: undefined;
+  ProfileScreen: undefined;
   Profile: undefined;
 };
 export type TabBarButtonList = {
@@ -294,8 +297,8 @@ const TabNavigator: React.FC = () => {
       )}
 
       <Tab.Screen
-        name="ProfileScreenBms"
-        component={ProfileScreenBms}
+        name="ProfileScreen"
+        component={ProfileScreen}
         options={{
           headerShown: false,
           tabBarButton: (props: any) => {
@@ -373,6 +376,9 @@ const Navigation = () => {
           <Stack.Screen name="Email" component={Email} />
           <Stack.Screen name="Location" component={Location} />
           <Stack.Screen name="HelpCenter" component={HelpCenter} />
+          <Stack.Screen name="ProfileScreenBms" component={ProfileScreenBms} />
+          <Stack.Screen name="Staff" component={StaffScreen} />
+
           <Stack.Screen
             name="NotificationSettings"
             component={NotificationSettings}

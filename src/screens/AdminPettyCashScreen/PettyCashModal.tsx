@@ -15,6 +15,7 @@ import {
 import {operationService} from '../../services/operationService';
 import {User} from '../../services/usersService';
 import Toast from 'react-native-toast-message';
+import swiggyColors from '../../assets/Color/swiggyColor';
 
 interface Props {
   isOpen: boolean;
@@ -57,7 +58,13 @@ export default function PettyCashModal({
         reason: form.reason,
       });
 
-      Toast.show({type: 'success', text1: 'Entry added successfully'});
+      Toast.show({
+        type: 'success',
+        text1: 'Entry added successfully',
+        props: {
+          backgroundColor: swiggyColors.veg,
+        },
+      });
       setForm({userId: '', userName: '', amount: '', reason: ''});
       onSuccess();
       onClose();

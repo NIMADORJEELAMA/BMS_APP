@@ -54,6 +54,9 @@ const MainApp = () => {
   const isAuthenticated = useSelector(
     (state: any) => state.auth.isAuthenticated,
   );
+  const token = useSelector((state: any) => state.auth.token);
+  console.log('token', token);
+
   useNotifications(isAuthenticated);
   return (
     <GestureHandlerRootView style={{flex: 1}}>

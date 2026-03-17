@@ -1,5 +1,16 @@
 import React, {useState} from 'react';
-import {View, StyleSheet, FlatList, Dimensions, ScrollView} from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  Dimensions,
+  Alert,
+  Modal,
+  ScrollView,
+} from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
 import LinearGradient from 'react-native-linear-gradient';
 import color from '../../assets/Color/color';
@@ -20,7 +31,10 @@ const IMAGE_SIZE = width / 3 - 20;
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import type {RootStackParamList} from '../../routes/navigation';
-
+import CustomButton from '../../components/CustomButton';
+import CustomButtonSocial from '../../components/CustomButtonSocial';
+import PhotoUploadModal from '../../components/Modals/PhotoUploadModal';
+import ImageUploadModal from '../../components/Modals/ImageUploadModal';
 import ProfileHeader from '../../components/Profile/ProfileHeader';
 import Premium from '../../components/Profile/Premium.tsx';
 import ButtonPreferences from '../../components/ButtonPreferences/index.tsx';
@@ -54,11 +68,13 @@ const ProfileScreen = () => {
               isVerified={true}
               onEditPress={() => console.log('Edit pressed')}
             />
+            <Premium />
+            <Premium />
 
             <View style={{alignItems: 'center'}}>
               <ButtonPreferences
-                title="Staff"
-                onPress={() => navigation.navigate('Staff')}
+                title="Preferences"
+                onPress={() => navigation.navigate('Preferences')}
                 LeftIcon={Filter}
                 RightIcon={ArrowRight}
                 // rightLabel="Next"

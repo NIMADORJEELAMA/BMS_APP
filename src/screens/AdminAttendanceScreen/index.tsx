@@ -25,6 +25,7 @@ import Toast from 'react-native-toast-message';
 import {Svg, Path} from 'react-native-svg';
 import {operationService} from '../../services/operationService';
 import axiosInstance from '../../services/axiosInstance';
+import swiggyColors from '../../assets/Color/swiggyColor';
 
 const COLUMN_WIDTH = 55;
 const NAME_COLUMN_WIDTH = 130;
@@ -221,7 +222,28 @@ export default function AdminAttendanceScreen() {
                             onPress={() =>
                               operationService
                                 .markAttendance(user.id, dateStr)
-                                .then(() => loadData(false))
+                                .then(() => {
+                                  // 1. Show the success toast
+                                  Toast.show({
+                                    type: 'success',
+                                    text1: 'Attendance Updated',
+                                    text2: `Status changed for ${user.name}`,
+                                    visibilityTime: 1000,
+                                    props: {
+                                      backgroundColor: swiggyColors.veg,
+                                    },
+                                  });
+                                  // 2. Refresh the data
+                                  loadData(false);
+                                })
+                                .catch(err => {
+                                  // Optional: Specific error handling for the toggle
+                                  Toast.show({
+                                    type: 'error',
+                                    text1: 'Update Failed',
+                                    text2: 'Could not update attendance status',
+                                  });
+                                })
                             }>
                             {isPresent ? (
                               <CheckIcon />
