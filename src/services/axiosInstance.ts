@@ -6,14 +6,14 @@ import {logout} from '../redux/slices/authSlice';
 import store from '../redux/store'; // Import your actual store file
 
 const stagingUrl = 'https://api-staging.hilltoptourism.in';
-// const BASE_URL = 'https://api.hilltoptourism.in';
+const BASE_URL = 'https://api.hilltoptourism.in';
 // const BASE_URL = 'http://localhost:3000';
 
 const LOCAL_IP = '192.168.1.6';
-const BASE_URL = Platform.select({
-  ios: `http://${LOCAL_IP}:3000`,
-  android: `http://${LOCAL_IP}:3000`, // or 'http://10.0.2.2:3000' for Emulator only
-});
+// const BASE_URL = Platform.select({
+//   ios: `http://${LOCAL_IP}:3000`,
+//   android: `http://${LOCAL_IP}:3000`, // or 'http://10.0.2.2:3000' for Emulator only
+// });
 
 // 1. Create the instance
 const axiosInstance = axios.create({

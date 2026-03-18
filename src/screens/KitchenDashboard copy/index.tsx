@@ -51,9 +51,6 @@ const KitchenDashboard = () => {
   const [rawItems, setRawItems] = useState([]);
   const [printingId, setPrintingId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [printStatus, setPrintStatus] = useState<{
-    [key: string]: 'idle' | 'printing' | 'failed';
-  }>({});
   const fetchKitchenQueue = async () => {
     try {
       const res = await api.get('/orders/kitchen/pending');
@@ -169,11 +166,11 @@ const KitchenDashboard = () => {
   useEffect(() => {
     fetchKitchenQueue();
 
-    const handleNewOrder = async (data: any) => {
-      // 1. Refresh the list so the UI stays in sync
+    const handleNewOrder = (data: any) => {
+      // 1. Refresh the list immediately
       fetchKitchenQueue();
 
-      // 2. UI Notification
+      // 2. Extract info for a better Toast
       const tableNum = data?.table?.number || 'N/A';
       const orderNo = data?.orderNumber ? `#${data.orderNumber}` : '';
 
@@ -185,27 +182,13 @@ const KitchenDashboard = () => {
         visibilityTime: 4000,
       });
 
-      // 3. AUTO-PRINT LOGIC
-      // We wrap this in a small delay or check to ensure
-      // the data structure matches what handlePrintKOT expects
-      if (data && data.items) {
-        console.log('Auto-printing KOT for Order:', data.orderNumber);
-
-        // Map the incoming socket data to the structure your printer expects
-        const orderToPrint = {
-          ...data,
-          tableNumber: tableNum,
-          // Ensure items have the expected structure for the print function
-          items: data.items.map((it: any) => ({
-            ...it,
-            status: it.status || 'PENDING',
-          })),
-        };
-
-        handlePrintKOT(orderToPrint);
-      }
+      // 3. OPTIONAL: Auto-print logic
+      // if (printerConnected) {
+      //   handlePrintKOT(data);
+      // }
     };
 
+    // Change 'kitchenUpdate' to match exactly what your Gateway sends
     socket.on('kitchenUpdate', handleNewOrder);
 
     return () => {
@@ -233,43 +216,31 @@ const KitchenDashboard = () => {
   };
 
   const handlePrintKOT = async (order: any) => {
-    const orderId = order.id || order._id;
-
-    // Set status to printing
-    setPrintStatus(prev => ({...prev, [orderId]: 'printing'}));
-
+    console.log('order', order);
     try {
       const itemsToPrint = order.items.filter(
-        (item: any) => item.status === 'PENDING',
+        item => item.status === 'PENDING',
       );
 
       if (itemsToPrint.length === 0) return;
 
-      // 1. Attempt Physical Print
+      // Attempt physical print first
       await printKOT({...order, items: itemsToPrint});
 
-      // 2. Success: Update DB status to PREPARING
+      // If print succeeds, update the database
       await Promise.all(
         itemsToPrint.map((item: any) =>
-          api.patch(`/orders/item/${item.id || item._id}/status`, {
-            status: 'PREPARING',
-          }),
+          api.patch(`/orders/item/${item.id}/status`, {status: 'PREPARING'}),
         ),
       );
 
-      setPrintStatus(prev => ({...prev, [orderId]: 'idle'}));
+      Toast.show({type: 'success', text1: 'KOT Sent to Printer'});
       fetchKitchenQueue();
     } catch (err) {
-      console.error('Print failed:', err);
-      // 3. Failure: Set status to failed so UI can show a Retry button
-      setPrintStatus(prev => ({...prev, [orderId]: 'failed'}));
-
-      Toast.show({
-        type: 'error',
-        text1: 'Printer Disconnected',
-        text2: 'Please check Bluetooth and tap Retry.',
-        autoHide: false, // Keep it visible until they acknowledge
-      });
+      // If printKOT fails, this block catches it and avoids DB updates
+      console.log('Process halted due to printer error');
+    } finally {
+      setPrintingId(null);
     }
   };
 
@@ -299,7 +270,6 @@ const KitchenDashboard = () => {
   // Render Component for Ticket Card
   // Inside renderOrderTicket
   const renderOrderTicket = ({item: order}: {item: any}) => {
-    const status = printStatus[order.id] || 'idle';
     const hasPendingItems = order.items.some(
       (i: any) => i.status === 'PENDING',
     );
@@ -399,31 +369,6 @@ const KitchenDashboard = () => {
         <TouchableOpacity
           style={[
             styles.footerBtn,
-            status === 'failed'
-              ? {backgroundColor: '#ef4444'}
-              : hasPendingItems
-              ? styles.btnPrint
-              : styles.btnReady,
-          ]}
-          onPress={() =>
-            hasPendingItems || status === 'failed'
-              ? handlePrintKOT(order)
-              : handleMarkEntireOrderReady(order)
-          }
-          disabled={status === 'printing'}>
-          <Text style={styles.footerBtnText}>
-            {status === 'printing'
-              ? 'PRINTING...'
-              : status === 'failed'
-              ? 'RETRY PRINT'
-              : hasPendingItems
-              ? 'PRINT KOT'
-              : 'MARK READY'}
-          </Text>
-        </TouchableOpacity>
-        {/* <TouchableOpacity
-          style={[
-            styles.footerBtn,
             hasPendingItems ? styles.btnPrint : styles.btnReady,
           ]}
           onPress={() =>
@@ -434,7 +379,7 @@ const KitchenDashboard = () => {
           <Text style={styles.footerBtnText}>
             {hasPendingItems ? 'PRINT KOT' : 'MARK READY'}
           </Text>
-        </TouchableOpacity> */}
+        </TouchableOpacity>
       </View>
     );
   };

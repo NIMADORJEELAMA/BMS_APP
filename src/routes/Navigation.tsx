@@ -44,6 +44,8 @@ import RoomSelectionScreen from '../screens/RoomSelectionScreen';
 import SplashScreen from '../screens/SplashScreen';
 import HomeIcon from '../assets/Icons/home-icon-silhouette-svgrepo-com.svg';
 import KitchenIcon from '../assets/Icons/kitchen-room.svg';
+import PrinterIcon from '../assets/Icons/printersvg.svg';
+
 import AttendanceIcon from '../assets/Icons/attendance1.svg';
 import CashIcon from '../assets/Icons/cash.svg';
 import FoodReportIcon from '../assets/Icons/database.svg';
@@ -219,7 +221,7 @@ const TabNavigator: React.FC = () => {
                   {...props}
                   label="PrinterSettings"
                   icon={
-                    <KitchenIcon
+                    <PrinterIcon
                       height={22}
                       width={22}
                       fill={isSelected ? '#000000' : 'gray'}

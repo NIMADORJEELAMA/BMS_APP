@@ -80,6 +80,7 @@ const TableSelectionScreen = ({navigation}: any) => {
     // Listen for the same events as your Web dashboard
     socket.on('tableUpdated', handleUpdate);
     socket.on('newOrder', handleUpdate);
+    socket.on('tableSwapped', handleUpdate);
     socket.on('itemStatusUpdated', data => {
       console.log('data', data);
       // if (data.status === 'READY') {
@@ -97,6 +98,7 @@ const TableSelectionScreen = ({navigation}: any) => {
       socket.off('tableUpdated', handleUpdate);
       socket.off('newOrder', handleUpdate);
       socket.off('itemStatusUpdated', handleUpdate);
+      socket.off('tableSwapped', handleUpdate);
     };
   }, []);
 

@@ -1,12 +1,13 @@
 // socket.js or within the file
 import {Platform} from 'react-native';
 import {io} from 'socket.io-client';
+const BASE_URL = 'https://api.hilltoptourism.in';
 
 const LOCAL_IP = '192.168.1.6';
-const BASE_URL = Platform.select({
-  ios: `http://${LOCAL_IP}:3000`,
-  android: `http://${LOCAL_IP}:3000`, // or 'http://10.0.2.2:3000' for Emulator only
-});
+// const BASE_URL = Platform.select({
+//   ios: `http://${LOCAL_IP}:3000`,
+//   android: `http://${LOCAL_IP}:3000`, // or 'http://10.0.2.2:3000' for Emulator only
+// });
 
 const SOCKET_URL = BASE_URL; // Use your machine's IP for physical devices!
 export const socket = io(SOCKET_URL, {

@@ -11,6 +11,7 @@ import {Text} from './../components/common/UI';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import BackIcon from '../assets/Icons/left-arrow.svg'; // Adjust path
+import PrinterStatusHeader from './PrinterSettings/PrinterStatusHeader';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -65,6 +66,7 @@ const MainLayout = ({
           {/* CENTER SECTION */}
           <View style={styles.centerSection}>
             <Text style={styles.headerTitle}>{title}</Text>
+            {/* <PrinterStatusHeader /> */}
             {subtitle && <Text style={styles.headerSubtitle}>{subtitle}</Text>}
           </View>
 

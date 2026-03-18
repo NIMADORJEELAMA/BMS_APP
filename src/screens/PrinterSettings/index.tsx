@@ -12,6 +12,10 @@ import {BLEPrinter} from 'react-native-thermal-receipt-printer-image-qr';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MainLayout from '../MainLayout';
 import Toast from 'react-native-toast-message';
+import SearchIcon from '../../assets/Icons/search.svg'; // Adjust path
+import PrinterIcon from '../../assets/Icons/printersvg.svg'; // Adjust path
+import swiggyColors from '../../assets/Color/swiggyColor';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const PrinterSettings = () => {
   const [printers, setPrinters] = useState([]);
@@ -41,11 +45,18 @@ const PrinterSettings = () => {
       setLoading(false);
     }
   };
-
   const connectToPrinter = async (printer: any) => {
     try {
       setLoading(true);
       await BLEPrinter.connectPrinter(printer.inner_mac_address);
+
+      // Save to storage
+      await AsyncStorage.setItem(
+        'SAVED_PRINTER_MAC',
+        printer.inner_mac_address,
+      );
+      await AsyncStorage.setItem('SAVED_PRINTER_NAME', printer.device_name);
+
       setConnectedMac(printer.inner_mac_address);
       Toast.show({
         type: 'success',
@@ -57,6 +68,21 @@ const PrinterSettings = () => {
       setLoading(false);
     }
   };
+  // const connectToPrinter = async (printer: any) => {
+  //   try {
+  //     setLoading(true);
+  //     await BLEPrinter.connectPrinter(printer.inner_mac_address);
+  //     setConnectedMac(printer.inner_mac_address);
+  //     Toast.show({
+  //       type: 'success',
+  //       text1: `Connected to ${printer.device_name}`,
+  //     });
+  //   } catch (err) {
+  //     Toast.show({type: 'error', text1: 'Connection Failed'});
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
     <MainLayout title="Printer Settings" subtitle="Configure Bluetooth KOT">
@@ -65,7 +91,13 @@ const PrinterSettings = () => {
           style={styles.scanBtn}
           onPress={scanPrinters}
           disabled={loading}>
-          <Ionicons name="search" size={20} color="#fff" />
+          <SearchIcon
+            width={18}
+            height={18}
+            stroke="#ffffff"
+            fill={'#ffffff'}
+            style={styles.searchIcon}
+          />
           <Text style={styles.btnText}>
             {loading ? 'Searching...' : 'Scan for Printers'}
           </Text>
@@ -88,7 +120,12 @@ const PrinterSettings = () => {
                 <Text style={styles.macAddress}>{item.inner_mac_address}</Text>
               </View>
               {connectedMac === item.inner_mac_address && (
-                <Ionicons name="checkmark-circle" size={24} color="#059669" />
+                <PrinterIcon
+                  width={26}
+                  height={26}
+                  fill={swiggyColors.veg}
+                  style={styles.searchIcon}
+                />
               )}
             </TouchableOpacity>
           )}
@@ -114,6 +151,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
     gap: 10,
+  },
+  searchIcon: {
+    marginRight: 10,
+    color: 'red',
   },
   btnText: {color: '#fff', fontWeight: 'bold'},
   deviceCard: {
