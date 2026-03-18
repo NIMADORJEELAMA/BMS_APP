@@ -49,13 +49,13 @@ const ProfileScreen = () => {
             style={styles.subcontainer}
             contentContainerStyle={styles.contentContainer}
             showsVerticalScrollIndicator={false}>
-            <ProfileHeader
+            {/* <ProfileHeader
               name="Nima"
               isVerified={true}
               onEditPress={() => console.log('Edit pressed')}
-            />
+            /> */}
 
-            <View style={{alignItems: 'center'}}>
+            <View style={{alignItems: 'center', marginTop: 400}}>
               <ButtonPreferences
                 title="Staff"
                 onPress={() => navigation.navigate('Staff')}

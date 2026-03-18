@@ -28,6 +28,7 @@ import Cart from '../../assets/Icons/cart.svg';
 
 import color from '../../assets/Color/color';
 import Toast from 'react-native-toast-message';
+import MenuSkeleton from '../../components/Skeleton/MenuSkeleton';
 const screenWidth = Dimensions.get('window').width;
 const itemWidth = (screenWidth - 48) / 3; // Precise spacing for 3-column grid
 
@@ -47,6 +48,7 @@ const OrderPage = ({route}: any) => {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [isOrdering, setIsOrdering] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true); // Start as true
   // Redux
   const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
@@ -79,18 +81,17 @@ const OrderPage = ({route}: any) => {
   useEffect(() => {
     const fetchMenu = async () => {
       try {
+        setLoading(true); // Ensure it's true when starting
         const data = await orderService.getMenu();
-        console.log('data', data);
-        // Automatically hide inactive items
         setMenuItems(data.filter((item: any) => item.isActive));
       } catch (err) {
-        console.log('err', err);
         console.error('Failed to fetch menu:', err);
+      } finally {
+        setLoading(false); // Turn off once done
       }
     };
     fetchMenu();
   }, []);
-
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
@@ -395,27 +396,33 @@ const OrderPage = ({route}: any) => {
           </ScrollView>
         </View>
 
-        <FlatList
-          data={filteredItems}
-          keyExtractor={item => item.id}
-          renderItem={renderGridItem}
-          numColumns={3}
-          columnWrapperStyle={styles.gridRow}
-          contentContainerStyle={{padding: 12, paddingBottom: 10}}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[swiggyColors.veg]} // Android spinner color
-              tintColor={swiggyColors.veg} // iOS spinner color
-            />
-          }
-          ListEmptyComponent={
-            <Div center mt={50}>
-              <Text style={{color: '#94A3B8'}}>No items found.</Text>
-            </Div>
-          }
-        />
+        {loading ? (
+          <ScrollView contentContainerStyle={{padding: 12}}>
+            <MenuSkeleton />
+          </ScrollView>
+        ) : (
+          <FlatList
+            data={filteredItems}
+            keyExtractor={item => item.id}
+            renderItem={renderGridItem}
+            numColumns={3}
+            columnWrapperStyle={styles.gridRow}
+            contentContainerStyle={{padding: 12, paddingBottom: 10}}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[swiggyColors.veg]}
+                tintColor={swiggyColors.veg}
+              />
+            }
+            ListEmptyComponent={
+              <Div center mt={50}>
+                <Text style={{color: '#94A3B8'}}>No items found.</Text>
+              </Div>
+            }
+          />
+        )}
       </View>
 
       {totalCartCount > 0 && (

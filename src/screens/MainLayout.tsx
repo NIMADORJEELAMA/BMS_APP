@@ -11,12 +11,11 @@ import {Text} from './../components/common/UI';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import BackIcon from '../assets/Icons/left-arrow.svg'; // Adjust path
-import PrinterStatusHeader from './PrinterSettings/PrinterStatusHeader';
 
 interface MainLayoutProps {
   children: React.ReactNode;
   title: string;
-  subtitle?: string;
+  subtitle?: string | React.ReactNode;
   showBack?: boolean;
   leftComponent?: React.ReactNode; // For Drawer or custom back
   rightComponent?: React.ReactNode; // For Cart, Profile, <etc styleName={}></etc>
@@ -66,9 +65,23 @@ const MainLayout = ({
           {/* CENTER SECTION */}
           <View style={styles.centerSection}>
             <Text style={styles.headerTitle}>{title}</Text>
-            {/* <PrinterStatusHeader /> */}
-            {subtitle && <Text style={styles.headerSubtitle}>{subtitle}</Text>}
+
+            {/* Logic to handle both text and components */}
+            {subtitle && (
+              <View style={{marginTop: 2}}>
+                {typeof subtitle === 'string' ? (
+                  <Text style={styles.headerSubtitle}>{subtitle}</Text>
+                ) : (
+                  subtitle
+                )}
+              </View>
+            )}
           </View>
+          {/* <View style={styles.centerSection}>
+            <Text style={styles.headerTitle}>{title}</Text>
+
+            {subtitle && <Text style={styles.headerSubtitle}>{subtitle}</Text>}
+          </View> */}
 
           {/* RIGHT SECTION */}
           <View style={[styles.sideSection, {alignItems: 'flex-end'}]}>

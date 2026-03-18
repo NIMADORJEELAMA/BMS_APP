@@ -27,7 +27,7 @@ import AddPhoto from '../screens/AddPhoto';
 import AnimatedTabButton from '../components/common/AnimatedTabButton';
 import Notification from '../screens/notifications/Index';
 import ProfileScreen from '../screens/ProfileScreen';
-import Settings from '../screens/Settings';
+
 import Preferences from '../screens/Preferences';
 import HelpCenter from '../screens/HelpCenter';
 import NotificationSettings from '../screens/NotificationSettings';
@@ -45,6 +45,7 @@ import SplashScreen from '../screens/SplashScreen';
 import HomeIcon from '../assets/Icons/home-icon-silhouette-svgrepo-com.svg';
 import KitchenIcon from '../assets/Icons/kitchen-room.svg';
 import PrinterIcon from '../assets/Icons/printersvg.svg';
+import SettingIcon from '../assets/Icons/settings-svgrepo-com.svg';
 
 import AttendanceIcon from '../assets/Icons/attendance1.svg';
 import CashIcon from '../assets/Icons/cash.svg';
@@ -103,6 +104,7 @@ export type BottomTabParamList = {
   FoodReport: undefined;
 
   ProfileScreen: undefined;
+  Settings: undefined;
   Profile: undefined;
 };
 export type TabBarButtonList = {
@@ -252,11 +254,12 @@ const TabNavigator: React.FC = () => {
                 <AnimatedTabButton
                   {...props}
                   label="Attendance"
+                  isSelected={isSelected}
                   icon={
                     <AttendanceIcon
                       height={22}
                       width={22}
-                      fill={isSelected ? '#000000' : 'gray'}
+                      color={isSelected ? '#000000' : 'gray'}
                       stroke={isSelected ? '#000000' : 'gray'}
                       strokeWidth="0.5"
                       // strokeLinecap="round"
@@ -282,14 +285,14 @@ const TabNavigator: React.FC = () => {
               return (
                 <AnimatedTabButton
                   {...props}
-                  label="PettyCash"
+                  label="Petty Cash"
                   icon={
                     <CashIcon
                       height={22}
                       width={22}
                       fill={isSelected ? '#000000' : 'gray'}
                       stroke={isSelected ? '#000000' : 'gray'}
-                      strokeWidth="1.5"
+                      strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
@@ -332,31 +335,33 @@ const TabNavigator: React.FC = () => {
         />
       )}
 
-      <Tab.Screen
-        name="ProfileScreen"
-        component={ProfileScreen}
-        options={{
-          headerShown: false,
-          tabBarButton: (props: any) => {
-            // Check if the tab is currently selected
-            const isSelected = props?.accessibilityState?.selected;
+      {role == 'ADMIN' && (
+        <Tab.Screen
+          name="Settings"
+          component={ProfileScreen}
+          options={{
+            headerShown: false,
+            tabBarButton: (props: any) => {
+              // Check if the tab is currently selected
+              const isSelected = props?.accessibilityState?.selected;
 
-            return (
-              <AnimatedTabButton
-                {...props}
-                label="Profile"
-                icon={
-                  <ProfileIcon
-                    width={24}
-                    height={24}
-                    fill={isSelected ? '#000000' : '#808080'} // Use a hex for gray to be safe
-                  />
-                }
-              />
-            );
-          },
-        }}
-      />
+              return (
+                <AnimatedTabButton
+                  {...props}
+                  label="Settings"
+                  icon={
+                    <SettingIcon
+                      height={22}
+                      width={22}
+                      color={isSelected ? '#000000' : 'gray'}
+                    />
+                  }
+                />
+              );
+            },
+          }}
+        />
+      )}
     </Tab.Navigator>
   );
 };

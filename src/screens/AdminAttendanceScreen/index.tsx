@@ -161,7 +161,7 @@ export default function AdminAttendanceScreen() {
 
               {users.map(user => (
                 <View key={user.id} style={[styles.cell, styles.nameColumn]}>
-                  <Text numberOfLines={1} style={styles.nameText}>
+                  <Text numberOfLines={2} style={styles.nameText}>
                     {user.name}
                   </Text>
                 </View>

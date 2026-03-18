@@ -45,12 +45,14 @@ const PrinterSettings = () => {
       setLoading(false);
     }
   };
+
   const connectToPrinter = async (printer: any) => {
     try {
       setLoading(true);
+      // Initialize again just to be safe
+      await BLEPrinter.init();
       await BLEPrinter.connectPrinter(printer.inner_mac_address);
 
-      // Save to storage
       await AsyncStorage.setItem(
         'SAVED_PRINTER_MAC',
         printer.inner_mac_address,
@@ -58,16 +60,42 @@ const PrinterSettings = () => {
       await AsyncStorage.setItem('SAVED_PRINTER_NAME', printer.device_name);
 
       setConnectedMac(printer.inner_mac_address);
+
       Toast.show({
         type: 'success',
-        text1: `Connected to ${printer.device_name}`,
+        text1: 'Connected',
+        text2: `${printer.device_name} is ready.`,
       });
     } catch (err) {
+      console.error(err);
       Toast.show({type: 'error', text1: 'Connection Failed'});
     } finally {
       setLoading(false);
     }
   };
+  // const connectToPrinter = async (printer: any) => {
+  //   try {
+  //     setLoading(true);
+  //     await BLEPrinter.connectPrinter(printer.inner_mac_address);
+
+  //     // Save to storage
+  //     await AsyncStorage.setItem(
+  //       'SAVED_PRINTER_MAC',
+  //       printer.inner_mac_address,
+  //     );
+  //     await AsyncStorage.setItem('SAVED_PRINTER_NAME', printer.device_name);
+
+  //     setConnectedMac(printer.inner_mac_address);
+  //     Toast.show({
+  //       type: 'success',
+  //       text1: `Connected to ${printer.device_name}`,
+  //     });
+  //   } catch (err) {
+  //     Toast.show({type: 'error', text1: 'Connection Failed'});
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   // const connectToPrinter = async (printer: any) => {
   //   try {
   //     setLoading(true);

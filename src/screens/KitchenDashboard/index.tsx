@@ -17,12 +17,15 @@ import {socket} from '../../services/socketService';
 import RoomIcon from '../../assets/Icons/housesvg.svg';
 import ChairIcon from '../../assets/Icons/chair.svg';
 import TickIcon from '../../assets/Icons/tick-svgrepo-com.svg';
+import ProfileIcon from '../../assets/Icons/profile.svg';
+import EmptyIcon from '../../assets/Icons/empty-svgrepo-com.svg';
 
 import swiggyColors from '../../assets/Color/swiggyColor';
 import {BLEPrinter} from 'react-native-thermal-receipt-printer-image-qr';
 
 // Use your actual IP, not localhost for physical devices
 import Svg, {Path} from 'react-native-svg';
+import PrinterStatusHeader from '../PrinterSettings/PrinterStatusHeader';
 
 const RefreshIcon = ({width, height, fill, style}: any) => (
   <Svg
@@ -47,7 +50,7 @@ const RefreshIcon = ({width, height, fill, style}: any) => (
     />
   </Svg>
 );
-const KitchenDashboard = () => {
+const KitchenDashboard = ({navigation}: any) => {
   const [rawItems, setRawItems] = useState([]);
   const [printingId, setPrintingId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -285,11 +288,11 @@ const KitchenDashboard = () => {
 
       if (updatePromises.length === 0) return;
       await Promise.all(updatePromises);
-      // Toast.show({
-      //   type: 'success',
-      //   text1: `Table ${order.tableNumber} Ready!`,
-      //   position: 'top',
-      // });
+      Toast.show({
+        type: 'success',
+        text1: `Table ${order.tableNumber} Ready!`,
+        position: 'top',
+      });
       fetchKitchenQueue();
     } catch (err) {
       Toast.show({type: 'error', text1: 'Failed to mark ready'});
@@ -552,8 +555,16 @@ const KitchenDashboard = () => {
   return (
     <MainLayout
       title="Kitchen Queue"
-      subtitle={`${groupedOrders.length} Active Tickets`}
       rightComponent={
+        <TouchableOpacity
+          onPress={() => navigation.navigate('ProfileScreenBms')}
+          style={styles.refreshBtn}
+          activeOpacity={0.7}>
+          <ProfileIcon width={22} height={22} />
+        </TouchableOpacity>
+      }
+      subtitle={<PrinterStatusHeader />}
+      leftComponent={
         <TouchableOpacity
           onPress={onRefresh}
           style={styles.refreshBtn}
@@ -578,7 +589,7 @@ const KitchenDashboard = () => {
         // onRefresh={onRefresh}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="cafe-outline" size={60} color="#cbd5e1" />
+            <EmptyIcon width={62} height={62} />
             <Text style={styles.emptyText}>Kitchen Clear</Text>
           </View>
         }
@@ -591,7 +602,7 @@ const styles = StyleSheet.create({
     padding: 8,
     marginRight: 4,
     backgroundColor: '#f1f5f9',
-    borderRadius: 8,
+    borderRadius: 24,
   },
   // If you want a simple rotation while refreshing
   rotating: {
@@ -724,7 +735,7 @@ const styles = StyleSheet.create({
   btnReady: {backgroundColor: '#059669'},
   footerBtnText: {color: 'white', fontWeight: 'bold', fontSize: 11},
   emptyContainer: {alignItems: 'center', marginTop: 100},
-  emptyText: {marginTop: 12, fontSize: 16, color: '#94a3b8', fontWeight: '600'},
+  emptyText: {marginTop: 12, fontSize: 24, color: '#94a3b8', fontWeight: '600'},
 });
 
 // const styles = StyleSheet.create({

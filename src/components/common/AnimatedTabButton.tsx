@@ -49,7 +49,12 @@ const AnimatedTabButton = (props: any) => {
       />
       <View style={{alignItems: 'center'}}>
         {props.icon}
-        <Text style={{color: isSelected ? '#000' : 'gray', fontSize: 12}}>
+        <Text
+          style={{
+            color: isSelected ? '#000' : 'gray',
+            fontSize: 12,
+            fontWeight: isSelected ? 'bold' : 'normal',
+          }}>
           {props.label}
         </Text>
       </View>
