@@ -69,7 +69,6 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   setShowPickerModal,
   onImageSelected,
 }) => {
-  console.log('onImageSelected', onImageSelected);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const flatListRef = useRef<FlatList<PhotoExample> | null>(null);
   const [images, setImages] = useState<string>('');

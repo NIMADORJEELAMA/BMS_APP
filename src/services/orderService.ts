@@ -30,4 +30,9 @@ export const orderService = {
     );
     return response.data;
   },
+
+  cancelItem: async (itemId: string) => {
+    const response = await axiosInstance.delete(`orders/item/${itemId}`);
+    return response.data;
+  },
 };

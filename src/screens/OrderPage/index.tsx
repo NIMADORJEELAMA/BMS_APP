@@ -35,7 +35,6 @@ const itemWidth = (screenWidth - 48) / 3; // Precise spacing for 3-column grid
 const OrderPage = ({route}: any) => {
   const navigation = useNavigation<any>();
   const {table, id} = route.params;
-  console.log('table orderpage', table);
 
   const tableId = table.id;
 
@@ -74,7 +73,6 @@ const OrderPage = ({route}: any) => {
   useEffect(() => {
     // If 'id' exists, it means we came from a notification
     if (id) {
-      console.log('🚀 Opening Modal automatically for Order:', id);
       setModalVisible(true);
     }
   }, [id]);
@@ -116,12 +114,14 @@ const OrderPage = ({route}: any) => {
     try {
       const payload = {
         tableId: tableId,
+        note: '',
         items: itemList.map(item => ({
           menuItemId: item.id,
           quantity: item.quantity,
         })),
       };
-      console.log('payload', payload);
+      console.log('payload 11', payload);
+
       await orderService.createOrder(payload);
       Toast.show({
         type: 'success',
@@ -187,9 +187,9 @@ const OrderPage = ({route}: any) => {
       activeOpacity={0.8}
       onPress={() => navigation.navigate('CartScreen', {table})}
       style={styles.cartHeaderBtn}>
-      <Text style={{fontSize: 22}}>
-        <Cart height={24} fill={color.dark} />
-      </Text>
+      <View style={{width: 24, height: 24}}>
+        <Cart width={24} height={24} fill="#000000" />
+      </View>
       {totalCartCount > 0 && (
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{totalCartCount}</Text>

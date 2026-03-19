@@ -30,8 +30,7 @@ const IconButton: React.FC<IconButtonProps> = ({
   textStyle,
 }) => {
   return (
-    console.log('iconName', iconName),
-    (
+   
       <TouchableOpacity
         style={[styles.button, style]}
         onPress={onPress}

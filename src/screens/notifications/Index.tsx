@@ -62,17 +62,12 @@ const Notification = profile => {
     <View>
       <Text>Notificationcfsdf</Text>
 
-      {yourStoriesArray.map(
-        (profile, index) => (
-          console.log('profile', profile),
-          (
-            <ProfileGrid
-              key={index}
-              profile={profile} // Replace with actual image
-            />
-          )
-        ),
-      )}
+      {yourStoriesArray.map((profile, index) => (
+        <ProfileGrid
+          key={index}
+          profile={profile} // Replace with actual image
+        />
+      ))}
     </View>
   );
 };

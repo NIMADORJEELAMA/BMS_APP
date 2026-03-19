@@ -13,7 +13,6 @@ const useLogout = () => {
         // Pass the current token explicitly if needed,
         // or just call it so the interceptor can grab it.
         await userService.updateFcmToken('');
-        console.log('Server FCM cleared');
       } catch (e) {
         console.warn('Server FCM clear failed, likely already expired');
       }

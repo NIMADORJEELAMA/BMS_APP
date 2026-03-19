@@ -57,7 +57,6 @@ export default function AdminPerformanceReportScreen() {
         startDateStr,
         endDateStr,
       );
-      console.log('res', res);
 
       setData(res);
     } catch (error) {

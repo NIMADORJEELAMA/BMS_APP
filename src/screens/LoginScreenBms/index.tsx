@@ -73,10 +73,9 @@ const LoginScreenBms = () => {
     setLoading(true);
     try {
       const response = await authService.login({email, password});
-      console.log('response', response);
+
       const token = response?.access_token;
       const userData = response?.user;
-      console.log('token', token);
 
       if (token) {
         await saveToken(token);
@@ -89,7 +88,7 @@ const LoginScreenBms = () => {
       }
     } catch (error: any) {
       const status = error.response?.status;
-      console.log('status', status);
+
       if (status === 401) {
         setErrors({general: 'Invalid email or password.'});
       } else {

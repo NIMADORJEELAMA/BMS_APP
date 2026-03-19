@@ -3881,6 +3881,7 @@ __metadata:
     prettier: 2.8.8
     react: 19.0.0
     react-native: 0.79.0
+    react-native-background-actions: ^4.0.1
     react-native-device-info: ^15.0.1
     react-native-fast-image: ^8.6.3
     react-native-gesture-handler: ^2.25.0
@@ -5913,6 +5914,13 @@ __metadata:
   version: 5.0.1
   resolution: "event-target-shim@npm:5.0.1"
   checksum: 1ffe3bb22a6d51bdeb6bf6f7cf97d2ff4a74b017ad12284cc9e6a279e727dc30a5de6bb613e5596ff4dc3e517841339ad09a7eec44266eccb1aa201a30448166
+  languageName: node
+  linkType: hard
+
+"eventemitter3@npm:^4.0.7":
+  version: 4.0.7
+  resolution: "eventemitter3@npm:4.0.7"
+  checksum: 1875311c42fcfe9c707b2712c32664a245629b42bb0a5a84439762dd0fd637fc54d078155ea83c2af9e0323c9ac13687e03cfba79b03af9f40c89b4960099374
   languageName: node
   linkType: hard
 
@@ -9223,6 +9231,17 @@ __metadata:
   dependencies:
     prop-types: ^15.8.1
   checksum: a1b211aff745b97351d78643d641fa298f7d71524eaf22fee8a69257ce52e85d6b3caf8e7fd26a521af34984fba7402b7c632c35ea69d618769387d1dcb6b32a
+  languageName: node
+  linkType: hard
+
+"react-native-background-actions@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "react-native-background-actions@npm:4.0.1"
+  dependencies:
+    eventemitter3: ^4.0.7
+  peerDependencies:
+    react-native: ">=0.47.0"
+  checksum: 101cf491a3d0f40abb1189238d6911f544a69cc14b13734dac485600a1cd013d2c452a75d13579a66104ad43e4998bb8b927b982d7ff5c6e0074329e2eae1738
   languageName: node
   linkType: hard
 

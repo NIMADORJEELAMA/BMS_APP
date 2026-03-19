@@ -26,6 +26,10 @@ import {BLEPrinter} from 'react-native-thermal-receipt-printer-image-qr';
 // Use your actual IP, not localhost for physical devices
 import Svg, {Path} from 'react-native-svg';
 import PrinterStatusHeader from '../PrinterSettings/PrinterStatusHeader';
+import {
+  startKitchenBackgroundService,
+  stopKitchenBackgroundService,
+} from '../../services/kitchenBackgroundService';
 
 const RefreshIcon = ({width, height, fill, style}: any) => (
   <Svg
@@ -60,7 +64,7 @@ const KitchenDashboard = ({navigation}: any) => {
   const fetchKitchenQueue = async () => {
     try {
       const res = await api.get('/orders/kitchen/pending');
-      console.log('res.data', res.data);
+
       setRawItems(res.data);
     } catch (err) {
       console.error('Error fetching kitchen queue:', err);
@@ -73,6 +77,11 @@ const KitchenDashboard = ({navigation}: any) => {
 
       // 1. Time Formatting
       const now = new Date();
+      const dateStr = `${now.getDate().toString().padStart(2, '0')}-${(
+        now.getMonth() + 1
+      )
+        .toString()
+        .padStart(2, '0')}-${now.getFullYear()}`;
       const hours = now.getHours();
       const minutes = now.getMinutes().toString().padStart(2, '0');
       const ampm = hours >= 12 ? 'PM' : 'AM';
@@ -85,7 +94,8 @@ const KitchenDashboard = ({navigation}: any) => {
       const oNumber = orderData?.orderNumber || order?.orderNumber || '-';
       const tNumber = order?.tableNumber || '-';
       const orderNote = orderData?.note || order?.note || '';
-
+      const waiterName =
+        orderData?.waiter?.name || order?.waiter?.name || 'Staff';
       let ticket = '';
 
       // Header - Clean & Professional
@@ -94,7 +104,9 @@ const KitchenDashboard = ({navigation}: any) => {
 
       // Table/Room name can be long, so we keep it on its own line
       ticket += `TABLE : ${tNumber}\n`;
+      ticket += `DATE  : ${dateStr}\n`;
       ticket += `TIME: ${timeStr}\n`;
+      ticket += `WAITER: ${waiterName.toUpperCase()}\n`;
       ticket += divider;
 
       ticket += `QTY  ITEM\n`;
@@ -129,7 +141,7 @@ const KitchenDashboard = ({navigation}: any) => {
       }
 
       // Space for manual tear
-      ticket += `\n\n`;
+      ticket += `\n\n\n\n`;
 
       await BLEPrinter.printText(ticket);
     } catch (err) {
@@ -175,6 +187,7 @@ const KitchenDashboard = ({navigation}: any) => {
     const handleNewOrder = async (data: any) => {
       // 1. Refresh the list so the UI stays in sync
       fetchKitchenQueue();
+      startKitchenBackgroundService();
 
       // 2. UI Notification
       const tableNum = data?.table?.number || 'N/A';
@@ -191,28 +204,29 @@ const KitchenDashboard = ({navigation}: any) => {
       // 3. AUTO-PRINT LOGIC
       // We wrap this in a small delay or check to ensure
       // the data structure matches what handlePrintKOT expects
-      if (data && data.items) {
-        console.log('Auto-printing KOT for Order:', data.orderNumber);
+      // if (data && data.items) {
+      //   console.log('Auto-printing KOT for Order:', data.orderNumber);
 
-        // Map the incoming socket data to the structure your printer expects
-        const orderToPrint = {
-          ...data,
-          tableNumber: tableNum,
-          // Ensure items have the expected structure for the print function
-          items: data.items.map((it: any) => ({
-            ...it,
-            status: it.status || 'PENDING',
-          })),
-        };
+      //   // Map the incoming socket data to the structure your printer expects
+      //   const orderToPrint = {
+      //     ...data,
+      //     tableNumber: tableNum,
+      //     // Ensure items have the expected structure for the print function
+      //     items: data.items.map((it: any) => ({
+      //       ...it,
+      //       status: it.status || 'PENDING',
+      //     })),
+      //   };
 
-        handlePrintKOT(orderToPrint);
-      }
+      //   handlePrintKOT(orderToPrint);
+      // }
     };
 
     socket.on('kitchenUpdate', handleNewOrder);
 
     return () => {
       socket.off('kitchenUpdate', handleNewOrder);
+      stopKitchenBackgroundService();
     };
   }, []);
   const handleMarkItemReady = async (itemId: string) => {

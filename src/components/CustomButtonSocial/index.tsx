@@ -22,7 +22,6 @@ const CustomButtonSocial: React.FC<CustomButtonProps> = ({
   icon,
   style,
 }) => {
-  console.log('icon', icon);
   return (
     <TouchableOpacity style={[styles.button, style]} onPress={onPress}>
       <View style={styles.content}>

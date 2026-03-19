@@ -54,7 +54,7 @@ const KitchenDashboard = () => {
   const fetchKitchenQueue = async () => {
     try {
       const res = await api.get('/orders/kitchen/pending');
-      console.log('res.data', res.data);
+
       setRawItems(res.data);
     } catch (err) {
       console.error('Error fetching kitchen queue:', err);
@@ -216,7 +216,6 @@ const KitchenDashboard = () => {
   };
 
   const handlePrintKOT = async (order: any) => {
-    console.log('order', order);
     try {
       const itemsToPrint = order.items.filter(
         item => item.status === 'PENDING',

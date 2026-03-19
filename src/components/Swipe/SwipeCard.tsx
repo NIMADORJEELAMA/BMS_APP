@@ -66,7 +66,7 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
   isTop = true,
 }) => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  console.log('profile', profile);
+
   const translateX = useSharedValue(0);
   const rotateZ = useSharedValue(0);
   const scale = useSharedValue(isTop ? 1 : 0.95);
@@ -131,9 +131,7 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
     };
   });
 
-  const handlePress = (text: string) => {
-    console.log(`${text} pressed`);
-  };
+  const handlePress = (text: string) => {};
   const passIndicatorStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       translateX.value,

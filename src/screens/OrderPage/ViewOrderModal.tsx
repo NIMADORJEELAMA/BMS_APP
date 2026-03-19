@@ -7,15 +7,18 @@ import {
   ActivityIndicator,
   Text,
   View,
+  Alert,
 } from 'react-native';
 import {Div} from '../../components/common/UI';
 import {orderService} from '../../services/orderService';
 import CloseBtn from '../../assets/Icons/closeIcon.svg';
+import ServeBtn from '../../assets/Icons/tick-svgrepo-com.svg';
+
 import swiggyColors from '../../assets/Color/swiggyColor';
 import color from '../../assets/Color/color';
 import {socket} from '../../services/socketService';
 import Toast from 'react-native-toast-message';
-
+import {Dimensions} from 'react-native';
 interface ViewOrderModalProps {
   visible: boolean;
   onClose: () => void;
@@ -25,11 +28,11 @@ interface ViewOrderModalProps {
     readyItemId: string;
   };
 }
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
-  console.log('visible, onClose, table', visible, onClose, table);
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [servingId, setServingId] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const itemLayouts = useRef<{[key: string]: number}>({});
@@ -56,7 +59,7 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
     try {
       // setLoading(true);
       const data = await orderService.getActiveOrders(table.id);
-      console.log('data', data);
+
       setOrder(data);
     } catch (err) {
       console.error(err);
@@ -89,7 +92,6 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
       // Only refresh if the update belongs to THIS table
       // The backend now sends the whole table object or tableId
       if (data.id === table.id || data.tableId === table.id) {
-        console.log('Refreshing order for table:', table.id);
         fetchActiveOrder();
       }
     };
@@ -98,7 +100,6 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
     socket.on('itemStatusUpdated', handleUpdate);
 
     socket.on('itemStatusUpdated', data => {
-      console.log('data>>>>>', data);
       // Check if the item belongs to this table's order
       if (data.tableId === table.id || data.orderId === order?.id) {
         // fetchActiveOrder();
@@ -123,7 +124,40 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
       socket.off('itemStatusUpdated');
     };
   }, [table.id, order?.id]); // Re-bind when IDs change
+  const handleCancelItem = async (itemId: string) => {
+    Alert.alert(
+      'Cancel Item',
+      'Are you sure you want to remove this item from the order?',
+      [
+        {text: 'No', style: 'cancel'},
+        {
+          text: 'Yes, Cancel',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setCancellingId(itemId);
+              await orderService.cancelItem(itemId);
 
+              Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: 'Item has been cancelled',
+              });
+
+              // Refresh the order to show updated totals/items
+              fetchActiveOrder();
+            } catch (err: any) {
+              const errorMsg =
+                err.response?.data?.message || 'Failed to cancel item';
+              Toast.show({type: 'error', text1: 'Error', text2: errorMsg});
+            } finally {
+              setCancellingId(null);
+            }
+          },
+        },
+      ],
+    );
+  };
   const handleServeItem = async (itemId: string) => {
     try {
       setServingId(itemId);
@@ -184,7 +218,7 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
   };
 
   return (
-    <Modal visible={visible} animationType="fade" transparent>
+    <Modal visible={visible} animationType="slide" transparent>
       <Div style={styles.overlay}>
         {/* Background Blur Effect Tap to Close */}
         <TouchableOpacity
@@ -203,7 +237,7 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
               <Text style={styles.title}>Order Summary</Text>
             </Div>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <CloseBtn width={20} height={20} color="#64748B" />
+              <CloseBtn width={20} height={20} color="#333333" />
             </TouchableOpacity>
           </Div>
 
@@ -226,7 +260,14 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
               showsVerticalScrollIndicator={false}>
               {order.items?.map((item: any) => {
                 const config = getStatusConfig(item.status);
-                const isReady = item.status === 'READY';
+                const canCancel =
+                  item.status === 'PENDING' ||
+                  item.status === 'PREPARING' ||
+                  item.status === 'READY';
+                const canBeServed =
+                  item.status === 'READY' ||
+                  (item.status === 'PENDING' &&
+                    item.menuItem.type === 'DRINKS');
                 const isHighlighted = item.id === activeHighlightId;
 
                 return (
@@ -263,7 +304,19 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
                         </Div>
                       </Div>
                     </Div>
-                    {isReady && (
+                    {canCancel && (
+                      <TouchableOpacity
+                        onPress={() => handleCancelItem(item.id)}
+                        disabled={cancellingId !== null}
+                        style={[styles.cancelBtn, {marginRight: 8}]}>
+                        {cancellingId === item.id ? (
+                          <ActivityIndicator size="small" color="#bba4a4" />
+                        ) : (
+                          <CloseBtn width={20} height={20} color="#f50505" />
+                        )}
+                      </TouchableOpacity>
+                    )}
+                    {canBeServed && (
                       <TouchableOpacity
                         activeOpacity={0.8}
                         style={[
@@ -275,7 +328,7 @@ const ViewOrderModal = ({visible, onClose, table}: ViewOrderModalProps) => {
                         {servingId === item.id ? (
                           <ActivityIndicator size="small" color="#FFF" />
                         ) : (
-                          <Text style={styles.serveBtnText}>Serve</Text>
+                          <ServeBtn width={20} height={20} color="#ffffff" />
                         )}
                       </TouchableOpacity>
                     )}
@@ -317,8 +370,9 @@ const styles = StyleSheet.create({
     backgroundColor: color.white,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
-    maxHeight: '85%',
-    bottom: 0,
+    height: SCREEN_HEIGHT * 0.85,
+    width: '100%',
+
     // paddingBottom: 10,
     // shadowColor: '#000',
     // shadowOffset: {width: 0, height: -10},
@@ -354,11 +408,14 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     backgroundColor: '#F1F5F9',
-    borderRadius: 18,
+    borderRadius: 36,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  scrollArea: {paddingHorizontal: 24},
+  scrollArea: {
+    flex: 1, // Crucial: This ensures the ScrollView takes up remaining space
+    paddingHorizontal: 24,
+  },
   orderItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -401,12 +458,25 @@ const styles = StyleSheet.create({
   },
   dot: {width: 6, height: 6, borderRadius: 3, marginRight: 6},
   statusLabel: {fontSize: 10, fontWeight: '800'},
-  serveBtn: {
-    backgroundColor: color.dark,
-    paddingHorizontal: 16,
+  cancelBtn: {
+    paddingHorizontal: 8,
     paddingVertical: 8,
-    borderRadius: 10,
-    minWidth: 70, // Added to prevent button shrinking when loader appears
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#FEE2E2', // Light red border
+    backgroundColor: '#FEF2F2', // Very light red bg
+  },
+  cancelBtnText: {
+    color: '#EF4444', // Red text
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  serveBtn: {
+    backgroundColor: swiggyColors.veg,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    borderRadius: 24,
+    // minWidth: 70, // Added to prevent button shrinking when loader appears
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -30,7 +30,7 @@ const ITEM_WIDTH = (width - 40) / 2;
 
 const TableSelectionScreen = ({navigation}: any) => {
   const [tables, setTables] = useState<any[]>([]);
-  console.log('tables', tables);
+
   const [categories, setCategories] = useState<any[]>([
     {label: 'All Areas', value: 'ALL'},
   ]);
@@ -73,7 +73,6 @@ const TableSelectionScreen = ({navigation}: any) => {
     if (!socket.connected) socket.connect();
 
     const handleUpdate = () => {
-      console.log('Socket event received: Refreshing tables...');
       loadInitialData(); // Re-fetch the data from API
     };
 
@@ -82,7 +81,6 @@ const TableSelectionScreen = ({navigation}: any) => {
     socket.on('newOrder', handleUpdate);
     socket.on('tableSwapped', handleUpdate);
     socket.on('itemStatusUpdated', data => {
-      console.log('data', data);
       // if (data.status === 'READY') {
       //   loadInitialData();
       //   Toast.show({

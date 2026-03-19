@@ -60,7 +60,6 @@ export const operationService = {
     endDate: string,
     userId?: string,
   ) => {
-    console.log('startDate, endDate', startDate, endDate);
     const response = await axiosInstance.get('orders/reports/performance', {
       params: {
         startDate,
@@ -72,7 +71,6 @@ export const operationService = {
         search: '',
       },
     });
-    console.log('response', response);
 
     // The API returns the whole object (summary, topSellingItems, etc.)
     // We return response.data directly so 'setData(res)' in your component

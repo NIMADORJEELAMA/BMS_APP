@@ -26,7 +26,7 @@ const CartScreen = ({route, navigation}: any) => {
   const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const [isOrdering, setIsOrdering] = useState(false);
-  console.log('cartItems', cartItems);
+
   const [orderNote, setOrderNote] = useState('');
   const [isSpicy, setIsSpicy] = useState(false);
 
@@ -70,6 +70,7 @@ const CartScreen = ({route, navigation}: any) => {
           backgroundColor: swiggyColors.veg,
         },
       });
+      setOrderNote('');
       dispatch(clearCart());
       navigation.goBack();
     } catch (err) {
@@ -93,93 +94,88 @@ const CartScreen = ({route, navigation}: any) => {
           {/* Order Items Section */}
 
           <View style={styles.sectionCard}>
-            {itemList.map(
-              (item, index) => (
-                console.log('item>>>', item),
-                (
+            {itemList.map((item, index) => (
+              <View
+                key={item.id}
+                style={[
+                  styles.cartItem,
+                  index === itemList.length - 1 && {borderBottomWidth: 0},
+                ]}>
+                <View style={styles.itemMain}>
+                  {/* Standard Veg/Non-Veg Marker */}
                   <View
-                    key={item.id}
                     style={[
-                      styles.cartItem,
-                      index === itemList.length - 1 && {borderBottomWidth: 0},
+                      styles.marker,
+                      {
+                        borderColor: item?.isVeg
+                          ? swiggyColors.veg
+                          : swiggyColors.nonVeg,
+                      },
                     ]}>
-                    <View style={styles.itemMain}>
-                      {/* Standard Veg/Non-Veg Marker */}
-                      <View
-                        style={[
-                          styles.marker,
-                          {
-                            borderColor: item?.isVeg
-                              ? swiggyColors.veg
-                              : swiggyColors.nonVeg,
-                          },
-                        ]}>
-                        <View
-                          style={[
-                            styles.dot,
-                            {
-                              backgroundColor: item?.isVeg
-                                ? swiggyColors.veg
-                                : swiggyColors.nonVeg,
-                            },
-                          ]}
-                        />
-                        {/* <Text style={styles.index}>
+                    <View
+                      style={[
+                        styles.dot,
+                        {
+                          backgroundColor: item?.isVeg
+                            ? swiggyColors.veg
+                            : swiggyColors.nonVeg,
+                        },
+                      ]}
+                    />
+                    {/* <Text style={styles.index}>
                           {index + 1} {'.'}
                         </Text> */}
-                      </View>
-                      <View style={{marginLeft: 10}}>
-                        <Text style={styles.itemName}>{item.name}</Text>
-                        <Text style={styles.itemPrice}>₹{item.price}</Text>
-                      </View>
-                    </View>
-
-                    {/* Swiggy-Style Qty Counter */}
-                    <View style={styles.qtyContainer}>
-                      <TouchableOpacity
-                        onPress={() =>
-                          dispatch(updateCartQuantity({item, delta: -1}))
-                        }
-                        style={styles.qtyBtn}>
-                        <Text style={styles.qtyBtnText}>−</Text>
-                      </TouchableOpacity>
-                      <Text style={styles.qtyText}>{item.quantity}</Text>
-                      <TouchableOpacity
-                        onPress={() =>
-                          dispatch(updateCartQuantity({item, delta: 1}))
-                        }
-                        style={styles.qtyBtn}>
-                        <Text style={styles.qtyBtnText}>+</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <View>
-                      <TouchableOpacity
-                        onPress={() =>
-                          dispatch(
-                            updateCartQuantity({
-                              item,
-                              delta: 0,
-                              toggleSpicy: true,
-                            }),
-                          )
-                        }
-                        style={[
-                          styles.miniSpicyBadge,
-                          item.isSpicy && styles.miniSpicyActive,
-                        ]}>
-                        <Text
-                          style={[
-                            styles.miniSpicyText,
-                            item.isSpicy && {color: '#fff'},
-                          ]}>
-                          🌶️
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
                   </View>
-                )
-              ),
-            )}
+                  <View style={{marginLeft: 10}}>
+                    <Text style={styles.itemName}>{item.name}</Text>
+                    <Text style={styles.itemPrice}>₹{item.price}</Text>
+                  </View>
+                </View>
+
+                {/* Swiggy-Style Qty Counter */}
+                <View style={styles.qtyContainer}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      dispatch(updateCartQuantity({item, delta: -1}))
+                    }
+                    style={styles.qtyBtn}>
+                    <Text style={styles.qtyBtnText}>−</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.qtyText}>{item.quantity}</Text>
+                  <TouchableOpacity
+                    onPress={() =>
+                      dispatch(updateCartQuantity({item, delta: 1}))
+                    }
+                    style={styles.qtyBtn}>
+                    <Text style={styles.qtyBtnText}>+</Text>
+                  </TouchableOpacity>
+                </View>
+                <View>
+                  <TouchableOpacity
+                    onPress={() =>
+                      dispatch(
+                        updateCartQuantity({
+                          item,
+                          delta: 0,
+                          toggleSpicy: true,
+                        }),
+                      )
+                    }
+                    style={[
+                      styles.miniSpicyBadge,
+                      item.isSpicy && styles.miniSpicyActive,
+                    ]}>
+                    <Text
+                      style={[
+                        styles.miniSpicyText,
+                        item.isSpicy && {color: '#fff'},
+                      ]}>
+                      🌶️
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
 
             {itemList.length === 0 && (
               <View style={{padding: 40, alignItems: 'center'}}>

@@ -118,7 +118,6 @@ const StoryCirclesExample: React.FC = () => {
   ];
 
   const handleStoryPress = (story: Story) => {
-    console.log('Story pressed:', story.username);
     // Handle story press - navigate to story viewer
   };
 

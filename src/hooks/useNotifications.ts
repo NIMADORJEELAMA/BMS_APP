@@ -30,9 +30,7 @@ export const useNotifications = (isAuthenticated: boolean) => {
       if (enabled) {
         const token = await getToken(messaging);
         if (token) {
-          console.log('✅ FCM Token retrieved:', token);
           await userService.updateFcmToken(token);
-          console.log('🚀 FCM Token synced with backend');
         }
       }
     } catch (error) {
@@ -44,14 +42,12 @@ export const useNotifications = (isAuthenticated: boolean) => {
     const syncTokenWithBackend = async (token: string) => {
       try {
         await userService.updateFcmToken(token);
-        console.log('🚀 FCM Token synced with backend');
       } catch (e) {
         console.error('❌ FCM sync failed', e);
       }
     };
 
     const handleNotificationNavigation = (data: any) => {
-      console.log('data 12312', data);
       if (data?.id) {
         navigate('OrderPage', {
           id: data.id,
@@ -99,8 +95,6 @@ export const useNotifications = (isAuthenticated: boolean) => {
       const remoteMessage = await getInitialNotification(messaging);
 
       if (remoteMessage) {
-        console.log('📦 Cold Boot Data:', remoteMessage.data);
-
         // Give the Navigator time to mount the AppStack
         setTimeout(() => {
           handleNotificationNavigation(remoteMessage.data);
@@ -123,7 +117,6 @@ export const useNotifications = (isAuthenticated: boolean) => {
 
     // Firebase Foreground Message
     const unsubscribeOnMessage = onMessage(messaging, async remoteMessage => {
-      console.log('🔥 Message received in foreground');
       await notifee.displayNotification({
         title: remoteMessage.notification?.title || 'Order Update',
         body: remoteMessage.notification?.body || 'New update from kitchen!',

@@ -14,12 +14,8 @@ const BUTTONS = [
 ];
 
 export function DatingScreen() {
-  const handlePress = (text: string) => {
-    console.log(`${text} pressed`);
-  };
-  const handleAgeRangeChange = (min: number, max: number) => {
-    console.log(`Selected age range: ${min} - ${max}`);
-  };
+  const handlePress = (text: string) => {};
+  const handleAgeRangeChange = (min: number, max: number) => {};
   return (
     <View style={styles.container}>
       <View style={styles.subContainer}>
