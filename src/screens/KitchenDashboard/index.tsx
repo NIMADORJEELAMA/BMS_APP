@@ -924,8 +924,11 @@ import swiggyColors from '../../assets/Color/swiggyColor';
 import {BLEPrinter} from 'react-native-thermal-receipt-printer-image-qr';
 
 // Use your actual IP, not localhost for physical devices
+// Use your actual IP, not localhost for physical devices
+
 import Svg, {Path} from 'react-native-svg';
 import PrinterStatusHeader from '../PrinterSettings/PrinterStatusHeader';
+
 
 const RefreshIcon = ({width, height, fill, style}: any) => (
   <Svg
