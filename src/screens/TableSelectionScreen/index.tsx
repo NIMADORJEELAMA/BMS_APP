@@ -274,6 +274,7 @@ const TableSelectionScreen = ({navigation}: any) => {
             </View>
 
             {/* 2. Table/Room Toggle (Styled as a compact pill) */}
+            {/*
             <View style={styles.compactTypeSlider}>
               {['TABLE', 'ROOM'].map(type => (
                 <TouchableOpacity
@@ -293,7 +294,7 @@ const TableSelectionScreen = ({navigation}: any) => {
                 </TouchableOpacity>
               ))}
             </View>
-
+*/}
             {/* 3. Status Filters */}
             <View style={styles.statusWrapper}>
               <StatusFilters />
