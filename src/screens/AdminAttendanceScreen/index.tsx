@@ -20,6 +20,7 @@ import {
   isWeekend,
   addMonths, // Add this
   subMonths,
+  isToday,
 } from 'date-fns';
 import Toast from 'react-native-toast-message';
 import {Svg, Path} from 'react-native-svg';
@@ -51,13 +52,30 @@ export default function AdminAttendanceScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
-
+  const horizontalScrollRef = React.useRef<ScrollView>(null);
   const calendarDays = useMemo(() => {
     const start = startOfMonth(currentDate);
     const end = endOfMonth(currentDate);
     return eachDayOfInterval({start, end});
   }, [currentDate]);
+  useEffect(() => {
+    const today = new Date();
+    // Only auto-scroll if we are looking at the current month/year
+    if (
+      currentDate.getMonth() === today.getMonth() &&
+      currentDate.getFullYear() === today.getFullYear()
+    ) {
+      const dayOfMonth = today.getDate();
+      // Calculate offset: (day - 1) * COLUMN_WIDTH
+      // We subtract a bit more or center it so today isn't hidden at the very edge
+      const offset = Math.max(0, (dayOfMonth - 2) * COLUMN_WIDTH);
 
+      // Small delay to ensure the layout has rendered
+      setTimeout(() => {
+        horizontalScrollRef.current?.scrollTo({x: offset, animated: true});
+      }, 500);
+    }
+  }, [currentDate]);
   const attendanceMap = useMemo(() => {
     const map = new Set<string>();
     attendanceData?.logs?.forEach((log: any) => {
@@ -169,24 +187,50 @@ export default function AdminAttendanceScreen() {
             </View>
 
             {/* RIGHT SCROLLABLE GRID */}
-            <ScrollView horizontal showsHorizontalScrollIndicator>
+            <ScrollView
+              ref={horizontalScrollRef}
+              horizontal
+              showsHorizontalScrollIndicator>
               <View>
                 {/* HEADER ROW */}
                 <View style={styles.tableRow}>
-                  {calendarDays.map(day => (
-                    <View
-                      key={day.toString()}
-                      style={[
-                        styles.cell,
-                        styles.headerCell,
-                        isWeekend(day) && styles.weekendHeader,
-                      ]}>
-                      <Text style={styles.dayText}>
-                        {format(day, 'EEE').toUpperCase()}
-                      </Text>
-                      <Text style={styles.dateText}>{format(day, 'dd')}</Text>
-                    </View>
-                  ))}
+                  {calendarDays.map(day => {
+                    // Correctly check if THIS specific column is today
+                    const isDayToday = isToday(day);
+
+                    return (
+                      <View
+                        key={day.toString()}
+                        style={[
+                          styles.cell,
+                          styles.headerCell,
+                          isWeekend(day) && styles.weekendHeader,
+                          isDayToday && {
+                            backgroundColor: '#dbeafe',
+                            borderBottomWidth: 3,
+                            borderBottomColor: '#2563eb',
+                          },
+                        ]}>
+                        <Text
+                          style={[
+                            styles.dayText,
+                            isDayToday && {
+                              color: '#2563eb',
+                              fontWeight: 'bold',
+                            },
+                          ]}>
+                          {format(day, 'EEE').toUpperCase()}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.dateText,
+                            isDayToday && {color: '#2563eb'},
+                          ]}>
+                          {format(day, 'dd')}
+                        </Text>
+                      </View>
+                    );
+                  })}
 
                   <View
                     style={[
